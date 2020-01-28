@@ -3,7 +3,7 @@
 ///
 
 import Foundation
-#if SwiftPackage
+#if SWIFT_PACKAGE
 import JobQueueCore
 #endif
 import JobQueue

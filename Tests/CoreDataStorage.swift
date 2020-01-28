@@ -4,14 +4,14 @@
 
 import CoreData
 import Foundation
-#if SwiftPackage
+#if SWIFT_PACKAGE
 import JobQueueCore
 #endif
 import Nimble
 import Quick
 import ReactiveSwift
 
-#if SwiftPackage
+#if SWIFT_PACKAGE
 @testable import JobQueueCoreDataStorage
 #else
 @testable import JobQueue
@@ -185,7 +185,7 @@ private class CoreDataStack {
 
     let entity = NSEntityDescription()
     entity.name = "JobDetailsCoreDataStorageEntity"
-    #if SwiftPackage
+    #if SWIFT_PACKAGE
     entity.managedObjectClassName = "JobDetailsCoreDataStorageEntity"
     #else
     entity.managedObjectClassName = "JobQueue.JobDetailsCoreDataStorageEntity"

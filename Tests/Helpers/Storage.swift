@@ -5,7 +5,7 @@
 import Foundation
 import JobQueue
 import ReactiveSwift
-#if SwiftPackage
+#if SWIFT_PACKAGE
 import JobQueueInMemoryStorage
 #endif
 

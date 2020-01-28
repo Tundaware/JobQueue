@@ -3,14 +3,14 @@
 ///
 
 import Foundation
-#if SwiftPackage
+#if SWIFT_PACKAGE
 import JobQueueCore
 #endif
 import Nimble
 import Quick
 import ReactiveSwift
 
-#if SwiftPackage
+#if SWIFT_PACKAGE
 @testable import JobQueueInMemoryStorage
 #else
 @testable import JobQueue

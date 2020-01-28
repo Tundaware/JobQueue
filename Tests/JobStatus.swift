@@ -5,7 +5,7 @@
 import Foundation
 import Nimble
 import Quick
-#if SwiftPackage
+#if SWIFT_PACKAGE
 import JobQueueCore
 #endif
 
