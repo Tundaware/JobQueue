@@ -48,32 +48,23 @@ Priorities are:
 ### Create a Job
 
 ```swift
-struct SendAnEmail: Job {
-  var id: JobID
-  var rawPayload: [UInt8]
-  var payload: Email
-  var status: JobStatus
-  var schedule: JobSchedule?
-  var queuedAt: Date
-  var order: Float?
-  var progress: Float?
-}
-
 struct Email: Codable {
   var recipientAddress: String
   var senderAddress: String
   var subject: String
   var body: String
 }
-```
 
-### Create a Processor
-
-```swift
-class SendEmailProcessor: DefaultJobProcessor<SendAnEmail> {
-  override func process(job: SendAnEmail, queue: JobQueue, done: @escaping (Result<Void, Error>) -> Void) {
-    doSomethingAsynchronous { error in
-      if let error = error else {
+// If you inherit from the `DefaultJob<T>` class, all you need to do is override and implement the `process(?)` function
+class SendAnEmail: DefaultJob<Email> {
+  override func process(
+    details: JobDetails,
+    payload: Email,
+    queue: JobQueueProtocol,
+    done: @escaping JobCompletion
+  ) {
+    send(email: payload) { error in
+      if let error = error {
         done(.failure(error))
       } else {
         done(.success(()))
@@ -88,21 +79,19 @@ class SendEmailProcessor: DefaultJobProcessor<SendAnEmail> {
 ```swift
 let schedulers = JobQueueSchedulers()
 let storage = JobQueueInMemoryStorage()
-let delayStrategy = JobQueueDelayPollingStrategy(interval: 0.25)
 
 let queue = JobQueue(
   name: "email",
   schedulers: schedulers,
-  storage: storage,
-  delayStrategy: delayStrategy
+  storage: storage
 )
 
 // Register the processor and allow for processing up to 4 concurrent SendEmail jobs
-queue.register(SendEmailProcessor.self, concurrency: 4)
+queue.register(SendAnEmail.self, concurrency: 4)
 
 // Resume the queue
 queue.resume().startWithCompleted {
-  print("Queue is running")
+  print("Resumed queue.")
 }
 ```
 
@@ -115,14 +104,9 @@ let email = Email(
   subject: "Job Queue question",
   body: "Do you even use a job queue?"
 )
-let job = SendAnEmail(
-  id: "email 1",
-  rawPayload: try! SendAnEmail.serialize(email),
-  payload: payload,
-  status: status,
-  queuedAt: queuedAt
-)
-queue.set(job).startWithCompleted {
-  print("Stored a job")
-}
+let details = try! JobDetails(SendAnEmail.self, id: "email 1", queueName: queue.name, payload: email)
+queue.store(details)
+  .startWithCompleted {
+    print("Stored a job")
+  }
 ```
