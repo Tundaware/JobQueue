@@ -38,6 +38,8 @@
 		B931EF9423E046BE00C44FB5 /* TestJob3.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF7923E046BE00C44FB5 /* TestJob3.swift */; };
 		B931EF9523E046BE00C44FB5 /* TestJob2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF7A23E046BE00C44FB5 /* TestJob2.swift */; };
 		B931EF9623E046BE00C44FB5 /* TestJob2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF7A23E046BE00C44FB5 /* TestJob2.swift */; };
+		B931EF9823E050E900C44FB5 /* CouchbaseLiteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF9723E050E900C44FB5 /* CouchbaseLiteStorage.swift */; };
+		B931EF9923E050E900C44FB5 /* CouchbaseLiteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF9723E050E900C44FB5 /* CouchbaseLiteStorage.swift */; };
 		B964BA5C23DF3D1E00AF9279 /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = B964BA5B23DF3D1E00AF9279 /* CoreDataStack.swift */; };
 		B9E9D29323DB084200D89111 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E9D29223DB084200D89111 /* AppDelegate.swift */; };
 		B9E9D29523DB084200D89111 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E9D29423DB084200D89111 /* SceneDelegate.swift */; };
@@ -72,6 +74,7 @@
 		B931EF7823E046BE00C44FB5 /* TestJob1.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestJob1.swift; sourceTree = "<group>"; };
 		B931EF7923E046BE00C44FB5 /* TestJob3.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestJob3.swift; sourceTree = "<group>"; };
 		B931EF7A23E046BE00C44FB5 /* TestJob2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestJob2.swift; sourceTree = "<group>"; };
+		B931EF9723E050E900C44FB5 /* CouchbaseLiteStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CouchbaseLiteStorage.swift; sourceTree = "<group>"; };
 		B964BA5B23DF3D1E00AF9279 /* CoreDataStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
 		B9E9D28F23DB084200D89111 /* Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9E9D29223DB084200D89111 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -143,6 +146,7 @@
 				B931EF7123E046BE00C44FB5 /* Helpers */,
 				B931EF7723E046BE00C44FB5 /* Jobs */,
 				B931EF6D23E046BE00C44FB5 /* CoreDataStorage.swift */,
+				B931EF9723E050E900C44FB5 /* CouchbaseLiteStorage.swift */,
 				B931EF6C23E046BD00C44FB5 /* DefaultJobProcessor.swift */,
 				B931EF7423E046BE00C44FB5 /* DefaultJobSorter.swift */,
 				B931EF6E23E046BE00C44FB5 /* InMemoryStorage.swift */,
@@ -476,6 +480,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B931EF8B23E046BE00C44FB5 /* DefaultJobSorter.swift in Sources */,
+				B931EF9823E050E900C44FB5 /* CouchbaseLiteStorage.swift in Sources */,
 				B931EF7F23E046BE00C44FB5 /* CoreDataStorage.swift in Sources */,
 				B931EF8723E046BE00C44FB5 /* Storage.swift in Sources */,
 				B931EF8123E046BE00C44FB5 /* InMemoryStorage.swift in Sources */,
@@ -497,6 +502,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B931EF8C23E046BE00C44FB5 /* DefaultJobSorter.swift in Sources */,
+				B931EF9923E050E900C44FB5 /* CouchbaseLiteStorage.swift in Sources */,
 				B931EF8023E046BE00C44FB5 /* CoreDataStorage.swift in Sources */,
 				B931EF8823E046BE00C44FB5 /* Storage.swift in Sources */,
 				B931EF8223E046BE00C44FB5 /* InMemoryStorage.swift in Sources */,
