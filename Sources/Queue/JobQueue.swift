@@ -213,6 +213,9 @@ public extension JobQueue {
       return SignalProducer(value: job)
     }
     return self.set(job.id, status: status)
+      .on(completed: {
+        self._events.input.send(value: .updatedStatus(job))
+      })
   }
 
   /**
@@ -414,43 +417,43 @@ private extension JobQueue {
             return false
           }
         }
-      .flatMap(.concat) { self.set($0, status: .active) }
-      .on(
-        value: { _job in
-          guard let processor = self.processors.activeProcessor(for: _job) else {
-            return
-          }
-          processor.process(details: _job, queue: self) { result in
-            self.schedulers.synchronize.schedule {
-              switch result {
-              case .success:
-                self.logger.trace("Queue (\(self.name)) job \(_job.id) processed")
-                self.set(_job.id, status: .completed(at: Date()))
-                  .on(
-                    value: {
-                      self.processors.remove(processors: [$0.id])
-                      self.logger.trace("Queue (\(self.name)) removed processor for job \($0.id)")
-                      self._events.input.send(value: .finishedProcessing($0))
-                    }
-                  )
-                  .start()
-              case .failure(let error):
-                self.logger.trace("Queue (\(self.name)) job \(_job.id) failed processing \(error.localizedDescription)")
-                self.set(_job.id, status: .failed(at: Date(), message: error.localizedDescription))
-                  .on(
-                    value: {
-                      self.processors.remove(processors: [$0.id])
-                      self.logger.trace("Queue (\(self.name)) removed processor for job \($0.id)")
-                      self._events.input.send(value: .failedProcessing($0, error))
-                    }
-                  )
-                  .start()
+        .flatMap(.concat) { self.set($0, status: .active) }
+        .on(
+          value: { _job in
+            guard let processor = self.processors.activeProcessor(for: _job) else {
+              return
+            }
+            processor.process(details: _job, queue: self) { result in
+              self.schedulers.synchronize.schedule {
+                switch result {
+                case .success:
+                  self.logger.trace("Queue (\(self.name)) job \(_job.id) processed")
+                  self.set(_job.id, status: .completed(at: Date()))
+                    .on(
+                      value: {
+                        self.processors.remove(processors: [$0.id])
+                        self.logger.trace("Queue (\(self.name)) removed processor for job \($0.id)")
+                        self._events.input.send(value: .finishedProcessing($0))
+                      }
+                    )
+                    .start()
+                case .failure(let error):
+                  self.logger.trace("Queue (\(self.name)) job \(_job.id) failed processing \(error.localizedDescription)")
+                  self.set(_job.id, status: .failed(at: Date(), message: error.localizedDescription))
+                    .on(
+                      value: {
+                        self.processors.remove(processors: [$0.id])
+                        self.logger.trace("Queue (\(self.name)) removed processor for job \($0.id)")
+                        self._events.input.send(value: .failedProcessing($0, error))
+                      }
+                    )
+                    .start()
+                }
+                self.logger.trace("Queue (\(self.name)) began processing job \(_job.id)")
+                self._events.input.send(value: .beganProcessing(job))
               }
-              self.logger.trace("Queue (\(self.name)) began processing job \(_job.id)")
-              self._events.input.send(value: .beganProcessing(job))
             }
           }
-        }
-      )
+        )
   }
 }
