@@ -6,7 +6,9 @@ import Foundation
 import Nimble
 import Quick
 import ReactiveSwift
+#if SwiftPackage
 import JobQueueCore
+#endif
 
 @testable import JobQueue
 

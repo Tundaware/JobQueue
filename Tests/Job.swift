@@ -3,7 +3,9 @@
 ///
 
 import Foundation
+#if SwiftPackage
 import JobQueueCore
+#endif
 import Nimble
 import Quick
 

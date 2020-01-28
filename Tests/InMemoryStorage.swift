@@ -3,12 +3,18 @@
 ///
 
 import Foundation
+#if SwiftPackage
 import JobQueueCore
+#endif
 import Nimble
 import Quick
 import ReactiveSwift
 
+#if SwiftPackage
 @testable import JobQueueInMemoryStorage
+#else
+@testable import JobQueue
+#endif
 
 class JobQueueInMemoryStorageTests: QuickSpec {
   override func spec() {
