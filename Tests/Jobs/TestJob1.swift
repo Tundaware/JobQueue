@@ -3,7 +3,9 @@
 ///
 
 import Foundation
+#if SWIFT_PACKAGE
 import JobQueueCore
+#endif
 import JobQueue
 import ReactiveSwift
 

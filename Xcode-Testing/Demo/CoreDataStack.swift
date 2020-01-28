@@ -29,7 +29,6 @@ class CoreDataStack {
     return SignalProducer { o, lt in
 
       self.container.loadPersistentStores { desc, error in
-        print(desc.url)
         guard let error = error else {
           o.send(value: ())
           o.sendCompleted()

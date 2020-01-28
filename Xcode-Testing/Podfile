@@ -1,12 +1,28 @@
-target 'JobQueueDemo' do
+abstract_target 'JobQueue' do
   use_frameworks!
 
   pod 'JobQueue/Queue', :path => "../"
   pod 'JobQueue/Storage/InMemory', :path => "../"
   pod 'JobQueue/Storage/CoreData', :path => "../"
   pod 'JobQueue/Storage/CouchbaseLite', :path => "../"
-
   pod 'ReactiveSwift'
   pod 'NanoID'
   pod 'CouchbaseLite-Swift'
+
+  target 'Demo' do
+    platform :ios, '13.2'
+  end
+
+  abstract_target 'Tests' do
+    pod 'Quick'
+    pod 'Nimble'
+
+    target 'Tests.iOS' do
+      platform :ios, '13.2'
+    end
+
+    target 'Tests.macOS' do
+      platform :osx, '10.15'
+    end
+  end
 end

@@ -5,7 +5,9 @@
 import Foundation
 import Nimble
 import Quick
+#if SWIFT_PACKAGE
 import JobQueueCore
+#endif
 
 @testable import JobQueue
 

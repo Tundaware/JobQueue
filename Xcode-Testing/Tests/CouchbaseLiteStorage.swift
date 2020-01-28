@@ -1,41 +1,47 @@
 ///
-///  Created by George Cox on 1/25/20.
+///  Created by George Cox on 1/28/20.
 ///
 
 import Foundation
-#if SWIFT_PACKAGE
-import JobQueueCore
-#endif
 import Nimble
 import Quick
 import ReactiveSwift
+import CouchbaseLiteSwift
 
-#if SWIFT_PACKAGE
-@testable import JobQueueInMemoryStorage
-#else
 @testable import JobQueue
-#endif
 
-class JobQueueInMemoryStorageTests: QuickSpec {
+class JobQueueCouchbaseLiteTests: QuickSpec {
+  var database: Database!
+
   override func spec() {
     var storage: JobStorage!
     var queue: JobQueueProtocol!
 
     beforeEach {
+      if self.database == nil {
+        let config = DatabaseConfiguration()
+        config.directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString).absoluteString
+        self.database = try! Database(name: "Testing", config: config)
+      }
+      guard let database = self.database else {
+        fatalError()
+      }
+
       queue = Queue()
-      storage = InMemoryStorage(scheduler: QueueScheduler())
+      storage = CouchbaseLiteStorage(database: database)
     }
 
     describe("within transaction") {
       it("can store jobs") {
         waitUntil { done in
           storage.transaction(queue: queue) { tx in
-            _ = tx.store(try! JobDetails(TestJob1.self, id: "1", queueName: "", payload: "test"))
+            _ = tx.store(try! JobDetails(TestJob1.self, id: "1", queueName: queue.name, payload: "test"))
             switch tx.get("1") {
             case .success(let job):
               expect(job.id).to(equal("1"))
               done()
             case .failure(let error):
+              print("Failure fetching job: \(error)")
               fail(error.localizedDescription)
             }
           }.startWithCompleted {}
@@ -44,7 +50,7 @@ class JobQueueInMemoryStorageTests: QuickSpec {
       it("can remove jobs") {
         waitUntil { done in
           storage.transaction(queue: queue) { tx in
-            _ = tx.store(try! JobDetails(TestJob1.self, id: "1", queueName: "", payload: "test"))
+            _ = tx.store(try! JobDetails(TestJob1.self, id: "1", queueName: queue.name, payload: "test"))
           }.flatMap(.concat) {
             storage.transaction(queue: queue) { tx in
               _ = tx.remove("1")
@@ -64,7 +70,7 @@ class JobQueueInMemoryStorageTests: QuickSpec {
       it("can store jobs") {
         waitUntil { done in
           storage.transaction(queue: queue) { tx in
-            _ = tx.store(try! JobDetails(TestJob1.self, id: "1", queueName: "", payload: "test"))
+            _ = tx.store(try! JobDetails(TestJob1.self, id: "1", queueName: queue.name, payload: "test"))
           }.flatMap(.concat) {
             storage.transaction(queue: queue) { tx in
               tx.get("1")
@@ -77,6 +83,7 @@ class JobQueueInMemoryStorageTests: QuickSpec {
               expect(job.id).to(equal("1"))
               done()
             case .failure(let error):
+              print("Failure fetching job: \(error)")
               fail(error.localizedDescription)
             }
           })
@@ -86,7 +93,7 @@ class JobQueueInMemoryStorageTests: QuickSpec {
       it("can remove jobs") {
         waitUntil { done in
           storage.transaction(queue: queue) { tx in
-            _ = tx.store(try! JobDetails(TestJob1.self, id: "1", queueName: "", payload: "test"))
+            _ = tx.store(try! JobDetails(TestJob1.self, id: "1", queueName: queue.name, payload: "test"))
           }.flatMap(.concat) {
             storage.transaction(queue: queue) { tx in
               _ = tx.remove("1")

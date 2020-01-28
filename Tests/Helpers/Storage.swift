@@ -5,6 +5,8 @@
 import Foundation
 import JobQueue
 import ReactiveSwift
+#if SWIFT_PACKAGE
 import JobQueueInMemoryStorage
+#endif
 
 public typealias TestJobStorage = InMemoryStorage

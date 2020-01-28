@@ -4,21 +4,36 @@
 
 import CoreData
 import Foundation
+#if SWIFT_PACKAGE
 import JobQueueCore
+#endif
 import Nimble
 import Quick
 import ReactiveSwift
 
+#if SWIFT_PACKAGE
 @testable import JobQueueCoreDataStorage
+#else
+@testable import JobQueue
+#endif
 
 class JobQueueCoreDataStorageTests: QuickSpec {
-  private let stack = CoreDataStack()
+  private var stack: CoreDataStack!
 
   override func spec() {
     var storage: JobStorage!
     var queue: JobQueueProtocol!
 
     beforeEach {
+      waitUntil { done in
+        guard let _ = self.stack else {
+          self.stack = CoreDataStack(done: {
+            done()
+          })
+          return
+        }
+        done()
+      }
       queue = Queue()
       storage = CoreDataStorage(
         createContext: self.stack.container.newBackgroundContext,
@@ -121,16 +136,18 @@ private class CoreDataStack {
   let container: NSPersistentContainer
   let model = CoreDataStack.createModel()
 
-  init() {
+  init(done: @escaping () -> Void) {
     self.container = NSPersistentContainer(name: "test", managedObjectModel: self.model)
     let desc = NSPersistentStoreDescription()
     desc.type = NSInMemoryStoreType
     self.container.persistentStoreDescriptions = [desc]
     self.container.loadPersistentStores { desc, error in
       guard let error = error else {
+        done()
         return
       }
       print("Error loading persistent stores: \(error)")
+      done()
     }
   }
 
@@ -167,9 +184,12 @@ private class CoreDataStack {
     let model = NSManagedObjectModel()
 
     let entity = NSEntityDescription()
-    entity.name = "JobQueueCoreDataStorageEntity"
-    entity.managedObjectClassName = JobDetailsCoreDataStorageEntity.className()
-
+    entity.name = "JobDetailsCoreDataStorageEntity"
+    #if SWIFT_PACKAGE
+    entity.managedObjectClassName = "JobDetailsCoreDataStorageEntity"
+    #else
+    entity.managedObjectClassName = "JobQueue.JobDetailsCoreDataStorageEntity"
+    #endif
     let jobID = NSAttributeDescription()
     jobID.attributeType = .stringAttributeType
     jobID.name = "id"
