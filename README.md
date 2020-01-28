@@ -20,7 +20,7 @@ A persistent job queue with a simple API that does not depend on `Operation`/`Op
 - [x] In memory storage implementation
 - [ ] YapDatabase storage implementation
 - [x] Couchbase Lite storage implementation
-- [ ] Core Data storage implementation
+- [x] Core Data storage implementation
 - [ ] Realm storage implementation
 
 ## Dependencies
