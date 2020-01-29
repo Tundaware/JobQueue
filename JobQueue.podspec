@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "JobQueue"
-  s.version      = "0.0.29"
+  s.version      = "0.0.30"
   s.summary      = "A persistent and flexible job queue for Swift applications"
   s.description  = <<-DESC
   JobQueue is a persistent job queue with a simple API that does not depend on `Operation`/`OperationQueue`, is storage agnostic, supports for manual execution order, per job type concurrency limits, delayed jobs, and more.
