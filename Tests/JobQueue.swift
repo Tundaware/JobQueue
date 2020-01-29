@@ -110,8 +110,8 @@ class JobQueueTests: QuickSpec {
     describe("processing jobs") {
       describe("basic") {
         it("can process a job") {
-          let job = try! JobDetails(TestJob1.self, id: "0", queueName: queue.name, payload: "test")
-          queue.register(TestJob1.self)
+          let job = try! Job(Processor1.self, id: "0", queueName: queue.name, payload: "test")
+          queue.register(Processor1.self)
           var disposable: Disposable?
           waitUntil { done in
             disposable = queue.events.producer
@@ -134,10 +134,10 @@ class JobQueueTests: QuickSpec {
           disposable?.dispose()
         }
         it("can process several jobs") {
-          let jobs = (0..<25).reduce(into: [JobDetails]()) { acc, idx in
-            acc.append(try! JobDetails(TestJob1.self, id: "\(idx)", queueName: queue.name, payload: "test.\(idx)", order: Float(idx)))
+          let jobs = (0..<25).reduce(into: [Job]()) { acc, idx in
+            acc.append(try! Job(Processor1.self, id: "\(idx)", queueName: queue.name, payload: "test.\(idx)", order: Float(idx)))
           }
-          queue.register(TestJob1.self, concurrency: 50)
+          queue.register(Processor1.self, concurrency: 50)
           var disposable: Disposable?
           waitUntil(timeout: 2) { done in
             let ids = Set(jobs.map { $0.id })
@@ -172,13 +172,13 @@ class JobQueueTests: QuickSpec {
       describe("delayed jobs") {
         it("should run the job after the delayed status' `until` date") {
           let date = Date(timeIntervalSinceNow: 2)
-          let job = try! JobDetails(TestJob1.self,
+          let job = try! Job(Processor1.self,
             id: "delayed1",
             queueName: queue.name,
             payload: "delayed job",
             status: .delayed(until: date))
 
-          queue.register(TestJob1.self, concurrency: 50)
+          queue.register(Processor1.self, concurrency: 50)
           var disposable: Disposable?
 
           waitUntil(timeout: 5) { done in

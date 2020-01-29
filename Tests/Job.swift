@@ -19,8 +19,8 @@ class JobTests: QuickSpec {
       describe("when completed") {
         let date = Date(timeIntervalSince1970: 25)
         let status = JobStatus.completed(at: date)
-        let job = try! JobDetails(
-          TestJob1.self,
+        let job = try! Job(
+          Processor1.self,
           id: randomString(),
           queueName: "",
           payload: "",
@@ -45,8 +45,8 @@ class JobTests: QuickSpec {
       describe("when delayed") {
         let date = Date(timeIntervalSince1970: 50)
         let status = JobStatus.delayed(until: date)
-        let job = try! JobDetails(
-          TestJob1.self,
+        let job = try! Job(
+          Processor1.self,
           id: randomString(),
           queueName: "",
           payload: "",
@@ -72,8 +72,8 @@ class JobTests: QuickSpec {
         let date = Date(timeIntervalSince1970: 100)
         let message = "some failure"
         let status = JobStatus.failed(at: date, message: message)
-        let job = try! JobDetails(
-          TestJob1.self,
+        let job = try! Job(
+          Processor1.self,
           id: randomString(),
           queueName: "",
           payload: "",
@@ -105,7 +105,7 @@ class JobTests: QuickSpec {
               let payload = "string"
               do {
                 let bytes = try [UInt8](JSONEncoder().encode([payload]))
-                let result = try TestJob1.serialize(payload)
+                let result = try Processor1.serialize(payload)
                 expect(result.count).to(beGreaterThan(0))
                 expect(result).to(equal(bytes))
               } catch {
@@ -117,8 +117,8 @@ class JobTests: QuickSpec {
             it("should return the expected payload") {
               let payload = "string"
               do {
-                let serializeResult = try TestJob1.serialize(payload)
-                let deserializeResult = try TestJob1.deserialize(serializeResult)
+                let serializeResult = try Processor1.serialize(payload)
+                let deserializeResult = try Processor1.deserialize(serializeResult)
                 expect(deserializeResult).to(equal(payload))
               } catch {
                 fail("Failed to serialize: \(error)")
@@ -133,7 +133,7 @@ class JobTests: QuickSpec {
               let payload = TestPayload1(name: "testing")
               do {
                 let bytes = try [UInt8](JSONEncoder().encode([payload]))
-                let result = try TestJob2.serialize(payload)
+                let result = try Processor2.serialize(payload)
                 expect(result.count).to(beGreaterThan(0))
                 expect(result).to(equal(bytes))
               } catch {
@@ -145,8 +145,8 @@ class JobTests: QuickSpec {
             it("should return the expected payload") {
               let payload = TestPayload1(name: "testing")
               do {
-                let serializeResult = try TestJob2.serialize(payload)
-                let deserializeResult = try TestJob2.deserialize(serializeResult)
+                let serializeResult = try Processor2.serialize(payload)
+                let deserializeResult = try Processor2.deserialize(serializeResult)
                 expect(deserializeResult).to(equal(payload))
               } catch {
                 fail("Failed to serialize: \(error)")

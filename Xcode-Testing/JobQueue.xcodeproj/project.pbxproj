@@ -32,14 +32,14 @@
 		B931EF8E23E046BE00C44FB5 /* Job.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF7523E046BE00C44FB5 /* Job.swift */; };
 		B931EF8F23E046BE00C44FB5 /* JobQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF7623E046BE00C44FB5 /* JobQueue.swift */; };
 		B931EF9023E046BE00C44FB5 /* JobQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF7623E046BE00C44FB5 /* JobQueue.swift */; };
-		B931EF9123E046BE00C44FB5 /* TestJob1.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF7823E046BE00C44FB5 /* TestJob1.swift */; };
-		B931EF9223E046BE00C44FB5 /* TestJob1.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF7823E046BE00C44FB5 /* TestJob1.swift */; };
-		B931EF9323E046BE00C44FB5 /* TestJob3.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF7923E046BE00C44FB5 /* TestJob3.swift */; };
-		B931EF9423E046BE00C44FB5 /* TestJob3.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF7923E046BE00C44FB5 /* TestJob3.swift */; };
-		B931EF9523E046BE00C44FB5 /* TestJob2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF7A23E046BE00C44FB5 /* TestJob2.swift */; };
-		B931EF9623E046BE00C44FB5 /* TestJob2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF7A23E046BE00C44FB5 /* TestJob2.swift */; };
 		B931EF9823E050E900C44FB5 /* CouchbaseLiteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF9723E050E900C44FB5 /* CouchbaseLiteStorage.swift */; };
 		B931EF9923E050E900C44FB5 /* CouchbaseLiteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF9723E050E900C44FB5 /* CouchbaseLiteStorage.swift */; };
+		B95D7AAB23E1A20B00158A96 /* Processor3.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95D7AA823E1A20A00158A96 /* Processor3.swift */; };
+		B95D7AAC23E1A20B00158A96 /* Processor3.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95D7AA823E1A20A00158A96 /* Processor3.swift */; };
+		B95D7AAD23E1A20B00158A96 /* Processor1.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95D7AA923E1A20A00158A96 /* Processor1.swift */; };
+		B95D7AAE23E1A20B00158A96 /* Processor1.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95D7AA923E1A20A00158A96 /* Processor1.swift */; };
+		B95D7AAF23E1A20B00158A96 /* Processor2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95D7AAA23E1A20A00158A96 /* Processor2.swift */; };
+		B95D7AB023E1A20B00158A96 /* Processor2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95D7AAA23E1A20A00158A96 /* Processor2.swift */; };
 		B964BA5C23DF3D1E00AF9279 /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = B964BA5B23DF3D1E00AF9279 /* CoreDataStack.swift */; };
 		B9E9D29323DB084200D89111 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E9D29223DB084200D89111 /* AppDelegate.swift */; };
 		B9E9D29523DB084200D89111 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E9D29423DB084200D89111 /* SceneDelegate.swift */; };
@@ -71,10 +71,10 @@
 		B931EF7423E046BE00C44FB5 /* DefaultJobSorter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DefaultJobSorter.swift; path = ../../Tests/DefaultJobSorter.swift; sourceTree = "<group>"; };
 		B931EF7523E046BE00C44FB5 /* Job.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Job.swift; path = ../../Tests/Job.swift; sourceTree = "<group>"; };
 		B931EF7623E046BE00C44FB5 /* JobQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = JobQueue.swift; path = ../../Tests/JobQueue.swift; sourceTree = "<group>"; };
-		B931EF7823E046BE00C44FB5 /* TestJob1.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestJob1.swift; sourceTree = "<group>"; };
-		B931EF7923E046BE00C44FB5 /* TestJob3.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestJob3.swift; sourceTree = "<group>"; };
-		B931EF7A23E046BE00C44FB5 /* TestJob2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestJob2.swift; sourceTree = "<group>"; };
 		B931EF9723E050E900C44FB5 /* CouchbaseLiteStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CouchbaseLiteStorage.swift; sourceTree = "<group>"; };
+		B95D7AA823E1A20A00158A96 /* Processor3.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Processor3.swift; sourceTree = "<group>"; };
+		B95D7AA923E1A20A00158A96 /* Processor1.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Processor1.swift; sourceTree = "<group>"; };
+		B95D7AAA23E1A20A00158A96 /* Processor2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Processor2.swift; sourceTree = "<group>"; };
 		B964BA5B23DF3D1E00AF9279 /* CoreDataStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
 		B9E9D28F23DB084200D89111 /* Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9E9D29223DB084200D89111 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -144,7 +144,7 @@
 			children = (
 				B931EF2923E0416900C44FB5 /* Info.plist */,
 				B931EF7123E046BE00C44FB5 /* Helpers */,
-				B931EF7723E046BE00C44FB5 /* Jobs */,
+				B95D7AA723E1A20A00158A96 /* Processors */,
 				B931EF6D23E046BE00C44FB5 /* CoreDataStorage.swift */,
 				B931EF9723E050E900C44FB5 /* CouchbaseLiteStorage.swift */,
 				B931EF6C23E046BD00C44FB5 /* DefaultJobProcessor.swift */,
@@ -169,15 +169,15 @@
 			path = ../../Tests/Helpers;
 			sourceTree = "<group>";
 		};
-		B931EF7723E046BE00C44FB5 /* Jobs */ = {
+		B95D7AA723E1A20A00158A96 /* Processors */ = {
 			isa = PBXGroup;
 			children = (
-				B931EF7823E046BE00C44FB5 /* TestJob1.swift */,
-				B931EF7923E046BE00C44FB5 /* TestJob3.swift */,
-				B931EF7A23E046BE00C44FB5 /* TestJob2.swift */,
+				B95D7AA923E1A20A00158A96 /* Processor1.swift */,
+				B95D7AAA23E1A20A00158A96 /* Processor2.swift */,
+				B95D7AA823E1A20A00158A96 /* Processor3.swift */,
 			);
-			name = Jobs;
-			path = ../../Tests/Jobs;
+			name = Processors;
+			path = ../../Tests/Processors;
 			sourceTree = "<group>";
 		};
 		B9E9D28623DB084200D89111 = {
@@ -485,14 +485,14 @@
 				B931EF8723E046BE00C44FB5 /* Storage.swift in Sources */,
 				B931EF8123E046BE00C44FB5 /* InMemoryStorage.swift in Sources */,
 				B931EF8323E046BE00C44FB5 /* JobStatus.swift in Sources */,
-				B931EF9323E046BE00C44FB5 /* TestJob3.swift in Sources */,
-				B931EF9523E046BE00C44FB5 /* TestJob2.swift in Sources */,
 				B931EF7D23E046BE00C44FB5 /* DefaultJobProcessor.swift in Sources */,
 				B931EF8923E046BE00C44FB5 /* The.swift in Sources */,
 				B931EF8523E046BE00C44FB5 /* JobSchedule.swift in Sources */,
 				B931EF7B23E046BE00C44FB5 /* JobQueueProcessors.swift in Sources */,
-				B931EF9123E046BE00C44FB5 /* TestJob1.swift in Sources */,
 				B931EF8F23E046BE00C44FB5 /* JobQueue.swift in Sources */,
+				B95D7AAB23E1A20B00158A96 /* Processor3.swift in Sources */,
+				B95D7AAF23E1A20B00158A96 /* Processor2.swift in Sources */,
+				B95D7AAD23E1A20B00158A96 /* Processor1.swift in Sources */,
 				B931EF8D23E046BE00C44FB5 /* Job.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -507,14 +507,14 @@
 				B931EF8823E046BE00C44FB5 /* Storage.swift in Sources */,
 				B931EF8223E046BE00C44FB5 /* InMemoryStorage.swift in Sources */,
 				B931EF8423E046BE00C44FB5 /* JobStatus.swift in Sources */,
-				B931EF9423E046BE00C44FB5 /* TestJob3.swift in Sources */,
-				B931EF9623E046BE00C44FB5 /* TestJob2.swift in Sources */,
 				B931EF7E23E046BE00C44FB5 /* DefaultJobProcessor.swift in Sources */,
 				B931EF8A23E046BE00C44FB5 /* The.swift in Sources */,
 				B931EF8623E046BE00C44FB5 /* JobSchedule.swift in Sources */,
 				B931EF7C23E046BE00C44FB5 /* JobQueueProcessors.swift in Sources */,
-				B931EF9223E046BE00C44FB5 /* TestJob1.swift in Sources */,
 				B931EF9023E046BE00C44FB5 /* JobQueue.swift in Sources */,
+				B95D7AAC23E1A20B00158A96 /* Processor3.swift in Sources */,
+				B95D7AB023E1A20B00158A96 /* Processor2.swift in Sources */,
+				B95D7AAE23E1A20B00158A96 /* Processor1.swift in Sources */,
 				B931EF8E23E046BE00C44FB5 /* Job.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

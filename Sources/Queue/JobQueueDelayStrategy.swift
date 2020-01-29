@@ -12,7 +12,7 @@ public protocol JobQueueDelayStrategy {
   /// Invoked each time the queue is synchronized
   ///
   /// - Parameter jobs: the delayed jobs in the queue
-  func update(queue: JobQueue, jobs: [JobDetails])
+  func update(queue: JobQueue, jobs: [Job])
 }
 
 /**
@@ -40,7 +40,7 @@ public class JobQueueDelayPollingStrategy: JobQueueDelayStrategy {
     - queue: the queue the update applies to
     - jobs: the delayed jobs in the queue
    */
-  public func update(queue: JobQueue, jobs: [JobDetails]) {
+  public func update(queue: JobQueue, jobs: [Job]) {
     let disposable = disposablesByQueueName[queue.name]
     guard let earliestDelayedJob = jobs.earliestDelayedJob else {
       if let disposable = disposable {
@@ -58,13 +58,13 @@ public class JobQueueDelayPollingStrategy: JobQueueDelayStrategy {
       .flatMap(.concat) { now in
         queue.getAll().map { (jobs: $0, now: now) }
       }
-      .map { (jobs: [JobDetails], now: Date) in
+      .map { (jobs: [Job], now: Date) in
         jobs.delayedJobs.filter { job in
           job.delayedUntil! < now
         }
       }
-      .flatMap(.concat) { (jobs: [JobDetails]) in SignalProducer(jobs) }
-      .flatMap(.concat) { (job: JobDetails) in queue.set(job.id, status: .waiting) }
+      .flatMap(.concat) { (jobs: [Job]) in SignalProducer(jobs) }
+      .flatMap(.concat) { (job: Job) in queue.set(job.id, status: .waiting) }
       .start()
     }
   }

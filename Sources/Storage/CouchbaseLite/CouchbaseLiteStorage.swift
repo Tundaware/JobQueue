@@ -18,7 +18,10 @@ public class CouchbaseLiteStorage: JobStorage {
     self.database = database
     self.logger = logger
   }
-  public func transaction<T>(queue: JobQueueProtocol, _ closure: @escaping (JobStorageTransaction) throws -> T) -> SignalProducer<T, Error> {
+  public func transaction<T>(
+    queue: JobQueueProtocol,
+    _ closure: @escaping (JobStorageTransaction) throws -> T
+  ) -> SignalProducer<T, JobQueueError> {
     return SignalProducer { o, lt in
       do {
         var closureResult: T!
@@ -33,7 +36,7 @@ public class CouchbaseLiteStorage: JobStorage {
         o.send(value: closureResult)
         o.sendCompleted()
       } catch {
-        o.send(error: error)
+        o.send(error: .from(error))
       }
     }
   }

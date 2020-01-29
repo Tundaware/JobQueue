@@ -1,18 +1,18 @@
 PODS:
   - CouchbaseLite-Swift (2.7.0)
-  - JobQueue/Core (0.0.27):
+  - JobQueue/Core (0.0.29):
     - ReactiveSwift (~> 6.2.0)
-  - JobQueue/Queue (0.0.27):
+  - JobQueue/Queue (0.0.29):
     - JobQueue/Core
     - ReactiveSwift (~> 6.2.0)
-  - JobQueue/Storage/CoreData (0.0.27):
+  - JobQueue/Storage/CoreData (0.0.29):
     - JobQueue/Core
     - ReactiveSwift (~> 6.2.0)
-  - JobQueue/Storage/CouchbaseLite (0.0.27):
+  - JobQueue/Storage/CouchbaseLite (0.0.29):
     - CouchbaseLite-Swift (~> 2.7.0)
     - JobQueue/Core
     - ReactiveSwift (~> 6.2.0)
-  - JobQueue/Storage/InMemory (0.0.27):
+  - JobQueue/Storage/InMemory (0.0.29):
     - JobQueue/Core
     - ReactiveSwift (~> 6.2.0)
   - NanoID (1.0.1)
@@ -45,7 +45,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   CouchbaseLite-Swift: fc942af766946a7b1efbee2cc9b72ae04ec632e1
-  JobQueue: ccafbcbbc83085721ff5506904311614e678515b
+  JobQueue: 5dce698eff81f52229084cf4593da9d95b3c500f
   NanoID: fe7ede6a2e918252ec9a779adeb065a2b2522f49
   Nimble: 4ab1aeb9b45553c75b9687196b0fa0713170a332
   Quick: 7fb19e13be07b5dfb3b90d4f9824c855a11af40e

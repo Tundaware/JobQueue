@@ -35,7 +35,7 @@ class JobQueueCouchbaseLiteTests: QuickSpec {
       it("can store jobs") {
         waitUntil { done in
           storage.transaction(queue: queue) { tx in
-            _ = tx.store(try! JobDetails(TestJob1.self, id: "1", queueName: queue.name, payload: "test"))
+            _ = tx.store(try! Job(Processor1.self, id: "1", queueName: queue.name, payload: "test"))
             switch tx.get("1") {
             case .success(let job):
               expect(job.id).to(equal("1"))
@@ -50,7 +50,7 @@ class JobQueueCouchbaseLiteTests: QuickSpec {
       it("can remove jobs") {
         waitUntil { done in
           storage.transaction(queue: queue) { tx in
-            _ = tx.store(try! JobDetails(TestJob1.self, id: "1", queueName: queue.name, payload: "test"))
+            _ = tx.store(try! Job(Processor1.self, id: "1", queueName: queue.name, payload: "test"))
           }.flatMap(.concat) {
             storage.transaction(queue: queue) { tx in
               _ = tx.remove("1")
@@ -70,7 +70,7 @@ class JobQueueCouchbaseLiteTests: QuickSpec {
       it("can store jobs") {
         waitUntil { done in
           storage.transaction(queue: queue) { tx in
-            _ = tx.store(try! JobDetails(TestJob1.self, id: "1", queueName: queue.name, payload: "test"))
+            _ = tx.store(try! Job(Processor1.self, id: "1", queueName: queue.name, payload: "test"))
           }.flatMap(.concat) {
             storage.transaction(queue: queue) { tx in
               tx.get("1")
@@ -93,7 +93,7 @@ class JobQueueCouchbaseLiteTests: QuickSpec {
       it("can remove jobs") {
         waitUntil { done in
           storage.transaction(queue: queue) { tx in
-            _ = tx.store(try! JobDetails(TestJob1.self, id: "1", queueName: queue.name, payload: "test"))
+            _ = tx.store(try! Job(Processor1.self, id: "1", queueName: queue.name, payload: "test"))
           }.flatMap(.concat) {
             storage.transaction(queue: queue) { tx in
               _ = tx.remove("1")
