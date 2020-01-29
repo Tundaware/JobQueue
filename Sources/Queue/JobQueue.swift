@@ -340,8 +340,27 @@ private extension JobQueue {
           self._events.input.send(value: .cancelledProcessing(nil, .removed))
           return
         }
-        kvp.value.cancel(reason: .statusChangedToWaiting)
-        self._events.input.send(value: .cancelledProcessing(job, .statusChangedToWaiting))
+        guard let cancellationReason = { () -> JobCancellationReason? in
+          switch job.status {
+          case .paused:
+            return .statusChangedToPaused
+          case .delayed:
+            return .statusChangedToDelayed
+          case .waiting:
+            return .statusChangedToWaiting
+          default:
+            // TODO: It may be possible for .completed/.failed statuses to be encountered
+            // here, which isn't good. We need to either prevent that or handle
+            // it in a graceful manner. Theoretically, any completed/failed job
+            // should have already been removed when the processor indicated it
+            // completed/failed.
+            return nil
+          }
+        }() else {
+          return
+        }
+        kvp.value.cancel(reason: cancellationReason)
+        self._events.input.send(value: .cancelledProcessing(job, cancellationReason))
       }
 
       // Cleanup processors
