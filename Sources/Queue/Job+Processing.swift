@@ -20,11 +20,11 @@ extension JobProcessor {
   }
 }
 
-extension JobProcessor {
-  public static var typeName: JobName { String(describing: Self.self) }
-}
-
 open class DefaultJobProcessor<T>: JobProcessor, Equatable where T: Codable {
+  open class var typeName: JobName {
+    return String(describing: Self.self)
+  }
+
   public typealias Payload = T
 
   private let _cancelled = MutableProperty<JobCancellationReason?>(nil)

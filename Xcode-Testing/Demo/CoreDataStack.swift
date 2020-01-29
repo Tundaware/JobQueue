@@ -15,14 +15,8 @@ class CoreDataStack {
     self.container = NSPersistentContainer(name: "test", managedObjectModel: self.model)
     let desc = NSPersistentStoreDescription()
     desc.type = NSSQLiteStoreType
-    desc.url = self.getDocumentsDirectory().appendingPathComponent("\(UUID().uuidString).db")
+    desc.url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("\(UUID().uuidString).db")
     self.container.persistentStoreDescriptions = [desc]
-  }
-
-  func getDocumentsDirectory() -> URL {
-    let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-    let documentsDirectory = paths[0]
-    return documentsDirectory
   }
 
   func load() -> SignalProducer<Void, Error> {

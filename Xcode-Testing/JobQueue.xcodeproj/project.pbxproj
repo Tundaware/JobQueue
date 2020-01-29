@@ -34,6 +34,11 @@
 		B931EF9023E046BE00C44FB5 /* JobQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF7623E046BE00C44FB5 /* JobQueue.swift */; };
 		B931EF9823E050E900C44FB5 /* CouchbaseLiteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF9723E050E900C44FB5 /* CouchbaseLiteStorage.swift */; };
 		B931EF9923E050E900C44FB5 /* CouchbaseLiteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B931EF9723E050E900C44FB5 /* CouchbaseLiteStorage.swift */; };
+		B95D64C623E1CDA400734319 /* JobList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95D64C523E1CDA400734319 /* JobList.swift */; };
+		B95D64C823E1CDAB00734319 /* JobListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95D64C723E1CDAB00734319 /* JobListItem.swift */; };
+		B95D64CA23E1E40B00734319 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95D64C923E1E40B00734319 /* ContentView.swift */; };
+		B95D64CC23E1E45400734319 /* Queues.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95D64CB23E1E45400734319 /* Queues.swift */; };
+		B95D64CE23E1E58800734319 /* JobsPreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95D64CD23E1E58800734319 /* JobsPreviewData.swift */; };
 		B95D7AAB23E1A20B00158A96 /* Processor3.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95D7AA823E1A20A00158A96 /* Processor3.swift */; };
 		B95D7AAC23E1A20B00158A96 /* Processor3.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95D7AA823E1A20A00158A96 /* Processor3.swift */; };
 		B95D7AAD23E1A20B00158A96 /* Processor1.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95D7AA923E1A20A00158A96 /* Processor1.swift */; };
@@ -43,7 +48,6 @@
 		B964BA5C23DF3D1E00AF9279 /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = B964BA5B23DF3D1E00AF9279 /* CoreDataStack.swift */; };
 		B9E9D29323DB084200D89111 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E9D29223DB084200D89111 /* AppDelegate.swift */; };
 		B9E9D29523DB084200D89111 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E9D29423DB084200D89111 /* SceneDelegate.swift */; };
-		B9E9D29723DB084200D89111 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E9D29623DB084200D89111 /* ContentView.swift */; };
 		B9E9D29923DB084300D89111 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9E9D29823DB084300D89111 /* Assets.xcassets */; };
 		B9E9D29C23DB084300D89111 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9E9D29B23DB084300D89111 /* Preview Assets.xcassets */; };
 		B9E9D29F23DB084300D89111 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B9E9D29D23DB084300D89111 /* LaunchScreen.storyboard */; };
@@ -72,6 +76,11 @@
 		B931EF7523E046BE00C44FB5 /* Job.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Job.swift; path = ../../Tests/Job.swift; sourceTree = "<group>"; };
 		B931EF7623E046BE00C44FB5 /* JobQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = JobQueue.swift; path = ../../Tests/JobQueue.swift; sourceTree = "<group>"; };
 		B931EF9723E050E900C44FB5 /* CouchbaseLiteStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CouchbaseLiteStorage.swift; sourceTree = "<group>"; };
+		B95D64C523E1CDA400734319 /* JobList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobList.swift; sourceTree = "<group>"; };
+		B95D64C723E1CDAB00734319 /* JobListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobListItem.swift; sourceTree = "<group>"; };
+		B95D64C923E1E40B00734319 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B95D64CB23E1E45400734319 /* Queues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Queues.swift; sourceTree = "<group>"; };
+		B95D64CD23E1E58800734319 /* JobsPreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobsPreviewData.swift; sourceTree = "<group>"; };
 		B95D7AA823E1A20A00158A96 /* Processor3.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Processor3.swift; sourceTree = "<group>"; };
 		B95D7AA923E1A20A00158A96 /* Processor1.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Processor1.swift; sourceTree = "<group>"; };
 		B95D7AAA23E1A20A00158A96 /* Processor2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Processor2.swift; sourceTree = "<group>"; };
@@ -79,7 +88,6 @@
 		B9E9D28F23DB084200D89111 /* Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9E9D29223DB084200D89111 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B9E9D29423DB084200D89111 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		B9E9D29623DB084200D89111 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B9E9D29823DB084300D89111 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B9E9D29B23DB084300D89111 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B9E9D29E23DB084300D89111 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -169,6 +177,16 @@
 			path = ../../Tests/Helpers;
 			sourceTree = "<group>";
 		};
+		B95D64C423E1CD8C00734319 /* JobList */ = {
+			isa = PBXGroup;
+			children = (
+				B95D64C523E1CDA400734319 /* JobList.swift */,
+				B95D64C723E1CDAB00734319 /* JobListItem.swift */,
+				B95D64CD23E1E58800734319 /* JobsPreviewData.swift */,
+			);
+			path = JobList;
+			sourceTree = "<group>";
+		};
 		B95D7AA723E1A20A00158A96 /* Processors */ = {
 			isa = PBXGroup;
 			children = (
@@ -204,14 +222,16 @@
 		B9E9D29123DB084200D89111 /* Demo */ = {
 			isa = PBXGroup;
 			children = (
+				B9E9D29823DB084300D89111 /* Assets.xcassets */,
+				B9E9D2A023DB084300D89111 /* Info.plist */,
+				B9E9D29D23DB084300D89111 /* LaunchScreen.storyboard */,
+				B95D64C423E1CD8C00734319 /* JobList */,
 				B9E9D29223DB084200D89111 /* AppDelegate.swift */,
 				B9E9D29423DB084200D89111 /* SceneDelegate.swift */,
-				B9E9D29623DB084200D89111 /* ContentView.swift */,
-				B9E9D29823DB084300D89111 /* Assets.xcassets */,
-				B9E9D29D23DB084300D89111 /* LaunchScreen.storyboard */,
-				B9E9D2A023DB084300D89111 /* Info.plist */,
-				B9E9D29A23DB084300D89111 /* Preview Content */,
+				B95D64C923E1E40B00734319 /* ContentView.swift */,
 				B964BA5B23DF3D1E00AF9279 /* CoreDataStack.swift */,
+				B95D64CB23E1E45400734319 /* Queues.swift */,
+				B9E9D29A23DB084300D89111 /* Preview Content */,
 			);
 			path = Demo;
 			sourceTree = "<group>";
@@ -523,10 +543,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B95D64C823E1CDAB00734319 /* JobListItem.swift in Sources */,
 				B9E9D29323DB084200D89111 /* AppDelegate.swift in Sources */,
+				B95D64CE23E1E58800734319 /* JobsPreviewData.swift in Sources */,
+				B95D64CA23E1E40B00734319 /* ContentView.swift in Sources */,
 				B9E9D29523DB084200D89111 /* SceneDelegate.swift in Sources */,
-				B9E9D29723DB084200D89111 /* ContentView.swift in Sources */,
+				B95D64C623E1CDA400734319 /* JobList.swift in Sources */,
 				B964BA5C23DF3D1E00AF9279 /* CoreDataStack.swift in Sources */,
+				B95D64CC23E1E45400734319 /* Queues.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
