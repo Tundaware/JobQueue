@@ -5,5 +5,5 @@
 import Foundation
 import JobQueue
 
-class TestJob3: DefaultJob<String> {
+class Processor3: DefaultJobProcessor<String> {
 }

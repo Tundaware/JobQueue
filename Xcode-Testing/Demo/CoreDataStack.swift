@@ -75,8 +75,8 @@ class CoreDataStack {
     let model = NSManagedObjectModel()
 
     let entity = NSEntityDescription()
-    entity.name = "JobDetailsCoreDataStorageEntity"
-    entity.managedObjectClassName = "JobQueue.JobDetailsCoreDataStorageEntity"
+    entity.name = "JobCoreDataStorageEntity"
+    entity.managedObjectClassName = "JobQueue.JobCoreDataStorageEntity"
 
     let jobID = NSAttributeDescription()
     jobID.attributeType = .stringAttributeType
@@ -93,12 +93,12 @@ class CoreDataStack {
     jobQueueName.name = "queue"
     jobQueueName.isOptional = false
 
-    let jobDetails = NSAttributeDescription()
-    jobDetails.attributeType = .binaryDataAttributeType
-    jobDetails.name = "details"
-    jobDetails.isOptional = false
+    let job = NSAttributeDescription()
+    job.attributeType = .binaryDataAttributeType
+    job.name = "job"
+    job.isOptional = false
 
-    entity.properties = [jobID, jobTypeName, jobQueueName, jobDetails]
+    entity.properties = [jobID, jobTypeName, jobQueueName, job]
     model.entities = [entity]
 
     return model

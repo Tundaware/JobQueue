@@ -16,10 +16,10 @@ class DefaultJobProcessorTests: QuickSpec {
   override func spec() {
     describe("cancelling") {
       context("when cancelled") {
-        var processor: TestJob1!
+        var processor: Processor1!
 
         beforeEach {
-          processor = TestJob1()
+          processor = Processor1()
         }
 
         it("should send the cancel reason") {
@@ -42,12 +42,12 @@ class DefaultJobProcessorTests: QuickSpec {
     }
 
     describe("processing") {
-      context("an `AnyJob`") {
-        context("that doesn't match the processor's JobType") {
+      context("with an `AnyJobProcessor`") {
+        context("a job whose payload doesn't match the processor's Payload type") {
           var queue: JobQueue!
           var schedulers: JobQueueSchedulers!
           var storage: JobStorage!
-          var processor: AnyJob!
+          var processor: AnyJobProcessor!
 
           beforeEach {
             schedulers = JobQueueSchedulers()
@@ -56,30 +56,31 @@ class DefaultJobProcessorTests: QuickSpec {
             queue = JobQueue(name: "test",
                              schedulers: schedulers,
                              storage: storage)
-            processor = TestJob2()
+            processor = Processor2()
           }
 
-          it("should send an error because the default job processor is abstract") {
-            processor.process(details: try! JobDetails(TestJob1.self, id: "0", queueName: queue.name, payload: "test"),
+          it("should send an error") {
+            processor.process(job: try! Job(Processor1.self, id: "0", queueName: queue.name, payload: "test"),
                               queue: queue) { result in
               switch result {
-              case .success:
-                fail("should have failed")
+              case .success: fail("should have failed")
               case .failure(let error):
-                guard let e = error as? JobProcessorError else {
-                  fail("unexpected error type: \(error)")
-                  return
-                }
-                expect(e).to(equal(.invalidJobType))
+                expect({
+                  switch error {
+                  case .payloadDeserialization(let jobID, let queueName, _):
+                    return jobID == "0" && queueName == queue.name
+                  default: return false
+                  }
+                }()).to(beTrue())
               }
             }
           }
         }
-        context("that matches the processor's JobType") {
+        context("that matches the processor's Payload type") {
           var queue: JobQueue!
           var schedulers: JobQueueSchedulers!
           var storage: JobStorage!
-          var processor: AnyJob!
+          var processor: AnyJobProcessor!
 
           beforeEach {
             schedulers = JobQueueSchedulers()
@@ -88,22 +89,23 @@ class DefaultJobProcessorTests: QuickSpec {
             queue = JobQueue(name: "test",
                              schedulers: schedulers,
                              storage: storage)
-            processor = DefaultJob<String>()
-            queue.register(DefaultJob<String>.self)
+            processor = DefaultJobProcessor<String>()
+            queue.register(DefaultJobProcessor<String>.self)
           }
 
           it("should send an error because the default job processor is abstract") {
-            processor.process(details: try! JobDetails(TestJob1.self, id: "0", queueName: queue.name, payload: "test"),
+            processor.process(job: try! Job(Processor1.self, id: "0", queueName: queue.name, payload: "test"),
                               queue: queue) { result in
               switch result {
               case .success:
                 fail("should have failed")
               case .failure(let error):
-                guard let e = error as? JobProcessorError else {
-                  fail("unexpected error type: \(error)")
-                  return
-                }
-                expect(e).to(equal(.abstractFunction))
+                expect({
+                  switch error {
+                  case .abstractFunction: return true
+                  default: return false
+                  }
+                }()).to(beTrue())
               }
             }
           }
@@ -114,7 +116,7 @@ class DefaultJobProcessorTests: QuickSpec {
         var queue: JobQueue!
         var schedulers: JobQueueSchedulers!
         var storage: JobStorage!
-        var processor: AnyJob!
+        var processor: AnyJobProcessor!
 
         beforeEach {
           schedulers = JobQueueSchedulers()
@@ -123,21 +125,22 @@ class DefaultJobProcessorTests: QuickSpec {
           queue = JobQueue(name: "test",
                            schedulers: schedulers,
                            storage: storage)
-          processor = TestJob3()
+          processor = Processor3()
         }
 
         it("should send an error because the default job processor is abstract") {
-          processor.process(details: try! JobDetails(TestJob3.self, id: "0", queueName: queue.name, payload: "test"),
+          processor.process(job: try! Job(Processor3.self, id: "0", queueName: queue.name, payload: "test"),
                             queue: queue) { result in
             switch result {
             case .success:
               fail("should have failed")
             case .failure(let error):
-              guard let e = error as? JobProcessorError else {
-                fail("unexpected error type: \(error)")
-                return
-              }
-              expect(e).to(equal(.abstractFunction))
+              expect({
+                switch error {
+                case .abstractFunction: return true
+                default: return false
+                }
+              }()).to(beTrue())
             }
           }
         }

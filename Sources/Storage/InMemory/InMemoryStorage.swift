@@ -9,7 +9,7 @@ import JobQueueCore
 #endif
 
 public class InMemoryStorage: JobStorage {
-  private var data = [JobQueueName: [JobID: JobDetails]]()
+  private var data = [JobQueueName: [JobID: Job]]()
   private let scheduler: Scheduler
   private let logger: Logger
 
@@ -18,7 +18,7 @@ public class InMemoryStorage: JobStorage {
     self.logger = logger
   }
 
-  public func transaction<T>(queue: JobQueueProtocol, _ closure: @escaping (JobStorageTransaction) throws -> T) -> SignalProducer<T, Error> {
+  public func transaction<T>(queue: JobQueueProtocol, _ closure: @escaping (JobStorageTransaction) throws -> T) -> SignalProducer<T, JobQueueError> {
     return SignalProducer { o, lt in
       let transaction = Transaction(queue: queue, data: self.data, logger: self.logger)
 
@@ -28,7 +28,7 @@ public class InMemoryStorage: JobStorage {
           switch change {
           case .stored(let queueName, let jobId, let job):
             self.logger.trace("Storage applying .stored(\(queueName), \(jobId), \(job.status) from tx \(transaction.id)")
-            var jobs = self.data[queueName, default: [JobID: JobDetails]()]
+            var jobs = self.data[queueName, default: [JobID: Job]()]
             jobs[jobId] = job
             self.data[queueName] = jobs
           case .removed(let queueName, let jobId, let job):
@@ -47,7 +47,7 @@ public class InMemoryStorage: JobStorage {
         o.send(value: result)
         o.sendCompleted()
       } catch {
-        o.send(error: error)
+        o.send(error: .from(error))
       }
     }.start(on: self.scheduler)
   }

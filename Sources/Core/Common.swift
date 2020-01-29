@@ -18,11 +18,31 @@ public func abstract(_ message: @autoclosure () -> String = String(), file: Stat
   fatalError(message != String() ? message : "Function is abstract", file: file, line: line)
 }
 
-public typealias JobCompletion = (Result<Void, Error>) -> Void
+public typealias JobCompletion = (Result<Void, JobQueueError>) -> Void
 public enum JobCancellationReason {
   case statusChangedToWaiting
   case statusChangedToDelayed
   case removed
   case statusChangedToPaused
   case queueSuspended
+}
+
+public enum JobQueueError: Error {
+  case abstractFunction
+  case noQueueProvided
+  case queueNotFound(JobQueueName)
+  case jobNotFound(JobID, JobQueueName)
+  case payloadDeserialization(JobID, JobQueueName, Error)
+  case payloadSerialization(JobID, JobQueueName, Error)
+  case jobDeserializationFailed
+  case jobSerializationFailed
+  case storageNoDatabaseReference
+  case unexpected(Error)
+
+  public static func from(_ error: Error) -> JobQueueError {
+    guard let jobQueueError = error as? JobQueueError else {
+      return .unexpected(error)
+    }
+    return jobQueueError
+  }
 }

@@ -11,13 +11,13 @@ import JobQueueCore
 extension InMemoryStorage {
   public class Transaction: JobStorageTransaction {
     enum Change {
-      case stored(JobQueueName, JobID, JobDetails)
-      case removed(JobQueueName, JobID, JobDetails)
+      case stored(JobQueueName, JobID, Job)
+      case removed(JobQueueName, JobID, Job)
       case removedAll(JobQueueName)
     }
 
     private let logger: Logger
-    private var data: [JobQueueName: [JobID: JobDetails]]
+    private var data: [JobQueueName: [JobID: Job]]
     private var queue: JobQueueProtocol?
 
     internal var changes = [Change]()
@@ -25,7 +25,7 @@ extension InMemoryStorage {
 
     public init(
       queue: JobQueueProtocol? = nil,
-      data: [JobQueueName: [JobID: JobDetails]],
+      data: [JobQueueName: [JobID: Job]],
       logger: Logger
     ) {
       self.logger = logger
@@ -33,43 +33,43 @@ extension InMemoryStorage {
       self.data = data
     }
 
-    public func get(_ id: JobID, queue: JobQueueProtocol?) -> Result<JobDetails, Error> {
+    public func get(_ id: JobID, queue: JobQueueProtocol?) -> Result<Job, JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
-        return .failure(JobStorageError.noQueueProvided)
+        return .failure(.noQueueProvided)
       }
       guard let jobs = self.data[queue.name] else {
-        return .failure(JobStorageError.queueNotFound(queue.name))
+        return .failure(.queueNotFound(queue.name))
       }
       guard let job = jobs[id] else {
-        return .failure(JobStorageError.jobNotFound(queue.name, id))
+        return .failure(.jobNotFound(queue.name, id))
       }
       return .success(job)
     }
 
-    public func getAll(queue: JobQueueProtocol?) -> Result<[JobDetails], Error> {
+    public func getAll(queue: JobQueueProtocol?) -> Result<[Job], JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
-        return .failure(JobStorageError.noQueueProvided)
+        return .failure(.noQueueProvided)
       }
       guard let jobs = self.data[queue.name] else {
-        return .success([JobDetails]())
+        return .success([Job]())
       }
       return .success(jobs.values.map { $0 })
     }
 
-    public func store(_ job: JobDetails, queue: JobQueueProtocol?) -> Result<JobDetails, Error> {
+    public func store(_ job: Job, queue: JobQueueProtocol?) -> Result<Job, JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
-        return .failure(JobStorageError.noQueueProvided)
+        return .failure(.noQueueProvided)
       }
-      var jobs = self.data[queue.name, default: [JobID: JobDetails]()]
+      var jobs = self.data[queue.name, default: [JobID: Job]()]
       jobs[job.id] = job
       self.data[queue.name] = jobs
       self.changes.append(.stored(queue.name, job.id, job))
       return .success(job)
     }
 
-    public func remove(_ id: JobID, queue: JobQueueProtocol?) -> Result<JobID, Error> {
+    public func remove(_ id: JobID, queue: JobQueueProtocol?) -> Result<JobID, JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
-        return .failure(JobStorageError.noQueueProvided)
+        return .failure(.noQueueProvided)
       }
       guard var jobs = self.data[queue.name] else {
         return .success(id)
@@ -83,9 +83,9 @@ extension InMemoryStorage {
       return .success(id)
     }
 
-    public func remove(_ job: JobDetails, queue: JobQueueProtocol?) -> Result<JobDetails, Error> {
+    public func remove(_ job: Job, queue: JobQueueProtocol?) -> Result<Job, JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
-        return .failure(JobStorageError.noQueueProvided)
+        return .failure(.noQueueProvided)
       }
       guard var jobs = self.data[queue.name] else {
         return .success(job)
@@ -99,9 +99,9 @@ extension InMemoryStorage {
       return .success(job)
     }
 
-    public func removeAll(queue: JobQueueProtocol?) -> Result<Void, Error> {
+    public func removeAll(queue: JobQueueProtocol?) -> Result<Void, JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
-        return .failure(JobStorageError.noQueueProvided)
+        return .failure(.noQueueProvided)
       }
       guard self.data[queue.name] != nil else {
         return .success(())

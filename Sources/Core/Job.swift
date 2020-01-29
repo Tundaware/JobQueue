@@ -7,11 +7,7 @@
 
 import Foundation
 
-extension JobQueueName {
-  static let unassignedJobQueueName = "UNASSIGNEDJOBQUEUENAME"
-}
-
-public struct JobDetails: Codable {
+public struct Job: Codable {
   public typealias EncodedPayload = [UInt8]
 
   /// Unique name that identifies the type
@@ -78,56 +74,25 @@ public struct JobDetails: Codable {
     self.progress = progress
   }
 
-  public init<T>(
-    _ type: T.Type,
+  public init<ProcessorType>(
+    _ type: ProcessorType.Type,
     id: JobID,
     queueName: JobQueueName,
-    payload: T.Payload,
+    payload: ProcessorType.Payload,
     queuedAt: Date = Date(),
     status: JobStatus = .waiting,
     schedule: JobSchedule? = nil,
     order: Float? = nil,
     progress: Float? = nil
-  ) throws where T: Job {
-    self.type = T.typeName
+  ) throws where ProcessorType: JobProcessor {
+    self.type = ProcessorType.typeName
     self.id = id
     self.queueName = queueName
-    self.payload = try T.serialize(payload)
+    self.payload = try ProcessorType.serialize(payload)
     self.queuedAt = queuedAt
     self.status = status
     self.schedule = schedule
     self.order = order
     self.progress = progress
-  }
-}
-
-public protocol AnyJob {
-  static var typeName: JobName { get }
-
-  init()
-
-  func cancel(reason: JobCancellationReason)
-  func process(details: JobDetails, queue: JobQueueProtocol, done: @escaping JobCompletion)
-}
-public protocol Job: AnyJob {
-  associatedtype Payload: Codable
-
-  func cancel(reason: JobCancellationReason)
-  func process(details: JobDetails, payload: Payload, queue: JobQueueProtocol, done: @escaping JobCompletion)
-}
-
-extension Job {
-  /// Default implementation that uses the JSONEncoder
-  ///
-  /// - Parameter payload: the payload
-  public static func serialize(_ payload: Payload) throws -> [UInt8] {
-    return try .init(JSONEncoder().encode([payload]))
-  }
-
-  /// Default implementation that uses the JSONDecoder
-  ///
-  /// - Parameter rawPayload: the raw payload bytes
-  public static func deserialize(_ rawPayload: [UInt8]) throws -> Payload {
-    return try JSONDecoder().decode([Payload].self, from: .init(rawPayload)).first!
   }
 }

@@ -9,21 +9,21 @@ import CoreData
 import JobQueueCore
 #endif
 
-@objc(JobDetailsCoreDataStorageEntity)
-public class JobDetailsCoreDataStorageEntity: NSManagedObject {
+@objc(JobCoreDataStorageEntity)
+public class JobCoreDataStorageEntity: NSManagedObject {
   @NSManaged var id: JobID!
   @NSManaged var type: JobName!
   @NSManaged var queue: JobQueueName!
-  @NSManaged var details: Data!
+  @NSManaged var job: Data!
 
-  func setJobDetails(_ details: JobDetails) throws {
-    self.details = try JSONEncoder().encode(details)
-    self.id = details.id
-    self.queue = details.queueName
-    self.type = details.type
+  func setJob(_ job: Job) throws {
+    self.job = try JSONEncoder().encode(job)
+    self.id = job.id
+    self.queue = job.queueName
+    self.type = job.type
   }
-  func getJobDetails() throws -> JobDetails {
-    try JSONDecoder().decode(JobDetails.self, from: self.details)
+  func getJob() throws -> Job {
+    try JSONDecoder().decode(Job.self, from: self.job)
   }
 }
 
@@ -48,10 +48,10 @@ public class CoreDataStorage: JobStorage {
   public func transaction<T>(
     queue: JobQueueProtocol,
     _ closure: @escaping (JobStorageTransaction) throws -> T
-  ) -> SignalProducer<T, Error> {
+  ) -> SignalProducer<T, JobQueueError> {
     return SignalProducer { o, lt in
       guard let context = self.createContext() else {
-        o.send(error: Errors.noContext)
+        o.send(error: .storageNoDatabaseReference)
         return
       }
       let transaction = Transaction(
@@ -67,12 +67,12 @@ public class CoreDataStorage: JobStorage {
             o.send(value: closureResult)
             o.sendCompleted()
           case .failure(let error):
-            o.send(error: error)
+            o.send(error: .unexpected(error))
           }
         }
       } catch {
         self.rollback(context)
-        o.send(error: error)
+        o.send(error: .from(error))
       }
     }
   }

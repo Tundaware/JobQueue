@@ -77,13 +77,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   func demo(queue: JobQueue) {
     let id = ID(size: 10)
 
-    queue.register(TestJob.self, concurrency: 3)
+    queue.register(TestProcessor.self, concurrency: 3)
 
     // Add 10 jobs
-    let jobs = (0..<10).map { idx -> JobDetails in
+    let jobs = (0..<10).map { idx -> Job in
       let jobId = id.generate()
-      return try! JobDetails(
-        TestJob.self,
+      return try! Job(
+        TestProcessor.self,
         id: jobId,
         queueName: queue.name,
         payload: "Job #\(idx), ID: \(jobId)"
@@ -112,8 +112,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   }
 }
 
-class TestJob: DefaultJob<String> {
-  override func process(details: JobDetails, payload: Payload, queue: JobQueueProtocol, done: @escaping JobCompletion) {
+class TestProcessor: DefaultJobProcessor<String> {
+  override func process(job: Job, payload: Payload, queue: JobQueueProtocol, done: @escaping JobCompletion) {
     QueueScheduler().schedule(after: Date().addingTimeInterval(5)) {
       done(.success(()))
     }

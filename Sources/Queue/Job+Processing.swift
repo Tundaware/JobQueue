@@ -9,22 +9,22 @@ import ReactiveSwift
 import JobQueueCore
 #endif
 
-extension Job {
-  public func process(details: JobDetails, queue: JobQueueProtocol, done: @escaping JobCompletion) {
+extension JobProcessor {
+  public func process(job: Job, queue: JobQueueProtocol, done: @escaping JobCompletion) {
     do {
-      let payload = try Self.deserialize(details.payload)
-      self.process(details: details, payload: payload, queue: queue, done: done)
+      let payload = try Self.deserialize(job.payload)
+      self.process(job: job, payload: payload, queue: queue, done: done)
     } catch {
-      done(.failure(JobProcessorError.invalidJobType))
+      done(.failure(.payloadDeserialization(job.id, queue.name, error)))
     }
   }
 }
 
-extension Job {
+extension JobProcessor {
   public static var typeName: JobName { String(describing: Self.self) }
 }
 
-open class DefaultJob<T>: Job, Equatable where T: Codable {
+open class DefaultJobProcessor<T>: JobProcessor, Equatable where T: Codable {
   public typealias Payload = T
 
   private let _cancelled = MutableProperty<JobCancellationReason?>(nil)
@@ -43,8 +43,8 @@ open class DefaultJob<T>: Job, Equatable where T: Codable {
      - queue: the queue the job belongs to
      - done: the completion callback.
    */
-  open func process(details: JobDetails, payload: Payload, queue: JobQueueProtocol, done: @escaping JobCompletion) {
-    done(.failure(JobProcessorError.abstractFunction))
+  open func process(job: Job, payload: Payload, queue: JobQueueProtocol, done: @escaping JobCompletion) {
+    done(.failure(.abstractFunction))
   }
 
   /**
@@ -59,7 +59,7 @@ open class DefaultJob<T>: Job, Equatable where T: Codable {
     self._cancelled.swap(reason)
   }
 
-  public static func == (lhs: DefaultJob<T>, rhs: DefaultJob<T>) -> Bool {
+  public static func == (lhs: DefaultJobProcessor<T>, rhs: DefaultJobProcessor<T>) -> Bool {
     return ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
 }

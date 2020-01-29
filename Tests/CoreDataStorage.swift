@@ -46,7 +46,7 @@ class JobQueueCoreDataStorageTests: QuickSpec {
       it("can store jobs") {
         waitUntil { done in
           storage.transaction(queue: queue) { tx in
-            _ = tx.store(try! JobDetails(TestJob1.self, id: "1", queueName: queue.name, payload: "test"))
+            _ = tx.store(try! Job(Processor1.self, id: "1", queueName: queue.name, payload: "test"))
             switch tx.get("1") {
             case .success(let job):
               expect(job.id).to(equal("1"))
@@ -61,7 +61,7 @@ class JobQueueCoreDataStorageTests: QuickSpec {
       it("can remove jobs") {
         waitUntil { done in
           storage.transaction(queue: queue) { tx in
-            _ = tx.store(try! JobDetails(TestJob1.self, id: "1", queueName: queue.name, payload: "test"))
+            _ = tx.store(try! Job(Processor1.self, id: "1", queueName: queue.name, payload: "test"))
           }.flatMap(.concat) {
             storage.transaction(queue: queue) { tx in
               _ = tx.remove("1")
@@ -81,7 +81,7 @@ class JobQueueCoreDataStorageTests: QuickSpec {
       it("can store jobs") {
         waitUntil { done in
           storage.transaction(queue: queue) { tx in
-            _ = tx.store(try! JobDetails(TestJob1.self, id: "1", queueName: queue.name, payload: "test"))
+            _ = tx.store(try! Job(Processor1.self, id: "1", queueName: queue.name, payload: "test"))
           }.flatMap(.concat) {
             storage.transaction(queue: queue) { tx in
               tx.get("1")
@@ -107,7 +107,7 @@ class JobQueueCoreDataStorageTests: QuickSpec {
       it("can remove jobs") {
         waitUntil { done in
           storage.transaction(queue: queue) { tx in
-            _ = tx.store(try! JobDetails(TestJob1.self, id: "1", queueName: queue.name, payload: "test"))
+            _ = tx.store(try! Job(Processor1.self, id: "1", queueName: queue.name, payload: "test"))
           }.flatMap(.concat) {
             storage.transaction(queue: queue) { tx in
               _ = tx.remove("1")
@@ -184,11 +184,11 @@ private class CoreDataStack {
     let model = NSManagedObjectModel()
 
     let entity = NSEntityDescription()
-    entity.name = "JobDetailsCoreDataStorageEntity"
+    entity.name = "JobCoreDataStorageEntity"
     #if SWIFT_PACKAGE
-    entity.managedObjectClassName = "JobDetailsCoreDataStorageEntity"
+    entity.managedObjectClassName = "JobCoreDataStorageEntity"
     #else
-    entity.managedObjectClassName = "JobQueue.JobDetailsCoreDataStorageEntity"
+    entity.managedObjectClassName = "JobQueue.JobCoreDataStorageEntity"
     #endif
     let jobID = NSAttributeDescription()
     jobID.attributeType = .stringAttributeType
@@ -205,12 +205,12 @@ private class CoreDataStack {
     jobQueueName.name = "queue"
     jobQueueName.isOptional = false
 
-    let jobDetails = NSAttributeDescription()
-    jobDetails.attributeType = .binaryDataAttributeType
-    jobDetails.name = "details"
-    jobDetails.isOptional = false
+    let job = NSAttributeDescription()
+    job.attributeType = .binaryDataAttributeType
+    job.name = "job"
+    job.isOptional = false
 
-    entity.properties = [jobID, jobTypeName, jobQueueName, jobDetails]
+    entity.properties = [jobID, jobTypeName, jobQueueName, job]
     model.entities = [entity]
 
     return model
