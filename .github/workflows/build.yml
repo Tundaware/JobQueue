@@ -23,14 +23,12 @@ jobs:
     - name: Install Cocoapods
       run: gem install cocoapods
 
-    - name: Move to Xcode-Testing directory
-      run: cd Xcode-Testing
-
-    - name: Install dependencies
-      run: pod install
-
-    - name: Test (iOS/Pod)
+    - name: Install pod and test (iOS)
       run: >-
+        cd Xcode-Testing
+
+        pod install
+
         xcodebuild
         -workspace JobQueue.xcworkspace
         -scheme JobQueue
