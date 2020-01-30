@@ -1,4 +1,4 @@
-name: Swift
+name: Build
 
 on:
   push:
@@ -21,16 +21,16 @@ jobs:
       run: swift test -v -Xswiftc -suppress-warnings
 
     - name: Install Cocoapods
-    - run: gem install cocoapods
+      run: gem install cocoapods
 
     - name: Move to Xcode-Testing directory
-    - run: cd Xcode-Testing
+      run: cd Xcode-Testing
 
     - name: Install dependencies
-    - run: pod install
+      run: pod install
 
     - name: Test (iOS/Pod)
-    - run: >-
+      run: >-
         xcodebuild
         -workspace JobQueue.xcworkspace
         -scheme JobQueue
