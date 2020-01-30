@@ -139,7 +139,7 @@ class JobQueueTests: QuickSpec {
           }
           queue.register(Processor1.self, concurrency: 50)
           var disposable: Disposable?
-          waitUntil(timeout: 2) { done in
+          waitUntil(timeout: 5) { done in
             let ids = Set(jobs.map { $0.id })
             var completed = Set<JobID>()
 
