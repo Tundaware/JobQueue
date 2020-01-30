@@ -39,3 +39,11 @@ jobs:
         -sdk iphonesimulator
         -destination 'platform=iOS Simulator,name=iPhone 11 Pro,OS=13.3'
         test
+
+    - name: Run macOS Tests
+      working-directory: ./Xcode-Testing
+      run: >-
+        xcodebuild
+        -workspace JobQueue.xcworkspace
+        -scheme Tests.macOS
+        test
