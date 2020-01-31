@@ -9,18 +9,18 @@ import JobQueueCore
 import JobQueue
 import ReactiveSwift
 
-class Processor1: DefaultJobProcessor<String> {
+class Processor1: JobProcessor<String> {
   let scheduler = QueueScheduler()
 
   var isProcessing: Bool = false
 
-  override func process(job: Job, payload: String, queue: JobQueueProtocol, done: @escaping JobCompletion) {
+  override func process(job: Job, payload: String, queue: JobQueue) {
     guard !isProcessing else {
       return
     }
     isProcessing = true
     scheduler.schedule(after: Date(timeIntervalSinceNow: Double.random(in: 0.1..<0.25))) {
-      done(.success(()))
+      self.change(status: .completed(at: Date())).start()
     }
   }
 }

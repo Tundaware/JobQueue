@@ -11,7 +11,7 @@ public struct Job: Codable {
   public typealias EncodedPayload = [UInt8]
 
   /// Unique name that identifies the type
-  public let type: JobName
+  public let type: JobType
 
   /// Unique identifier of the job
   public let id: JobID
@@ -52,8 +52,20 @@ public struct Job: Codable {
   /// The *last* error message for a failed job
   public var failedMessage: String? { status.failedMessage }
 
-  internal init(
-    type: JobName,
+  /// Initializes a job with an encoded payload
+  ///
+  /// - Parameters:
+  ///   - type: The job's `JobType`
+  ///   - id: The job's id
+  ///   - queueName: The name of the queue
+  ///   - payload: The encoded payload
+  ///   - queuedAt: The queued at date
+  ///   - status: The job's initial status
+  ///   - schedule: The job's schedule (not supported yet)
+  ///   - order: The job's manual execution order
+  ///   - progress: The job's initial progress
+  public init(
+    type: JobType,
     id: JobID,
     queueName: JobQueueName,
     payload: EncodedPayload,
@@ -67,28 +79,6 @@ public struct Job: Codable {
     self.id = id
     self.queueName = queueName
     self.payload = payload
-    self.queuedAt = queuedAt
-    self.status = status
-    self.schedule = schedule
-    self.order = order
-    self.progress = progress
-  }
-
-  public init<ProcessorType>(
-    _ type: ProcessorType.Type,
-    id: JobID,
-    queueName: JobQueueName,
-    payload: ProcessorType.Payload,
-    queuedAt: Date = Date(),
-    status: JobStatus = .waiting,
-    schedule: JobSchedule? = nil,
-    order: Float? = nil,
-    progress: Float? = nil
-  ) throws where ProcessorType: JobProcessor {
-    self.type = ProcessorType.typeName
-    self.id = id
-    self.queueName = queueName
-    self.payload = try ProcessorType.serialize(payload)
     self.queuedAt = queuedAt
     self.status = status
     self.schedule = schedule

@@ -9,14 +9,14 @@ import JobQueue
 import NanoID
 import ReactiveSwift
 
-class TestProcessor: DefaultJobProcessor<String> {
-  override class var typeName: JobName {
+class TestProcessor: JobProcessor<String> {
+  override class var jobType: JobType {
     return "Test"
   }
 
-  override func process(job: Job, payload: Payload, queue: JobQueueProtocol, done: @escaping JobCompletion) {
+  override func process(job: Job, payload: String, queue: JobQueue) {
     QueueScheduler().schedule(after: Date().addingTimeInterval(TimeInterval.random(in: 0.5...10))) {
-      done(.success(()))
+      self.change(status: .completed(at: Date())).start()
     }
   }
 }
