@@ -18,7 +18,7 @@ class JobQueueProcessorsTests: QuickSpec {
 
       beforeEach {
         processors = JobQueueProcessors()
-        processors.configurations[Processor1.typeName] = JobProcessorConfiguration(Processor1.self, concurrency: 5)
+        processors.configurations[Processor1.jobType] = JobProcessorConfiguration(Processor1.self, concurrency: 5)
         processors.activeProcessor(for: try! Job(Processor1.self, id: "0", queueName: "", payload: "test"))
         processors.activeProcessor(for: try! Job(Processor1.self, id: "1", queueName: "", payload: "test"))
         processors.activeProcessor(for: try! Job(Processor1.self, id: "2", queueName: "", payload: "test"))
@@ -34,7 +34,7 @@ class JobQueueProcessorsTests: QuickSpec {
 
       beforeEach {
         processors = JobQueueProcessors()
-        processors.configurations[Processor1.typeName] = JobProcessorConfiguration(Processor1.self, concurrency: 5)
+        processors.configurations[Processor1.jobType] = JobProcessorConfiguration(Processor1.self, concurrency: 5)
         processors.activeProcessor(for: try! Job(Processor1.self, id: "0", queueName: "", payload: "test"))
         processors.activeProcessor(for: try! Job(Processor1.self, id: "1", queueName: "", payload: "test"))
         processors.activeProcessor(for: try! Job(Processor1.self, id: "2", queueName: "", payload: "test"))
@@ -42,7 +42,7 @@ class JobQueueProcessorsTests: QuickSpec {
 
       it("should remove the correct processors") {
         processors.remove(processors: ["1", "3"])
-        expect(processors.active[Processor1.typeName]!.keys.map { $0 }.sorted())
+        expect(processors.active[Processor1.jobType]!.keys.map { $0 }.sorted())
           .to(equal(["0", "2"]))
       }
     }
@@ -69,7 +69,7 @@ class JobQueueProcessorsTests: QuickSpec {
 
       context("when a configuration exists for the job") {
         beforeEach {
-          processors.configurations[Processor1.typeName] =
+          processors.configurations[Processor1.jobType] =
             .init(Processor1.self, concurrency: 1)
         }
         it("should return a processor") {
@@ -89,7 +89,7 @@ class JobQueueProcessorsTests: QuickSpec {
         context("when a processor does not already exist") {
           context("when the concurrency limit has not been reached") {
             beforeEach {
-              processors.configurations[Processor1.typeName] =
+              processors.configurations[Processor1.jobType] =
                 .init(Processor1.self, concurrency: 2)
             }
 
@@ -118,7 +118,7 @@ class JobQueueProcessorsTests: QuickSpec {
 
           context("when the concurrency limit has been reached") {
             beforeEach {
-              processors.configurations[Processor1.typeName] =
+              processors.configurations[Processor1.jobType] =
                 .init(Processor1.self, concurrency: 2)
               processors.activeProcessor(for: testJobs[0])
               processors.activeProcessor(for: testJobs[1])

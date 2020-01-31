@@ -14,7 +14,7 @@ public enum JobQueueEvent {
   case added(Job)
   case updated(Job)
   case removed(Job)
-  case registeredProcessor(JobName, concurrency: Int)
+  case registeredProcessor(JobType, concurrency: Int)
   case updatedStatus(Job)
   case updatedProgress(Job)
   case beganProcessing(Job)
@@ -296,11 +296,11 @@ public extension JobQueue {
      - concurrency: the maximum number of instances of this `JobProcessor` that can
      simultaneously process jobs. defaults to `1`.
    */
-  func register<T>(_ type: T.Type, concurrency: Int = 1) where T: JobProcessor {
-    self.processors.configurations[T.typeName] =
-      JobProcessorConfiguration(type, concurrency: concurrency)
+  func register<T, Payload>(_ type: T.Type, concurrency: Int = 1) where T: JobProcessor<Payload> {
+    self.processors.configurations[T.jobType] =
+      JobProcessorConfiguration(type, concurrency: concurrency, logger: self.logger)
 
-    self._events.input.send(value: .registeredProcessor(T.typeName, concurrency: concurrency))
+    self._events.input.send(value: .registeredProcessor(T.jobType, concurrency: concurrency))
   }
 }
 
@@ -333,52 +333,74 @@ private extension JobQueue {
 
       self.delayStrategy.update(queue: self, jobs: sortedJobs.delayedJobs)
 
-      // Apply cancellations
-      processorsToCancelByID.forEach { kvp in
-        guard let job = sortedJobs.first(where: { $0.id == kvp.key }) else {
-          kvp.value.cancel(reason: .removed)
-          self._events.input.send(value: .cancelledProcessing(nil, .removed))
-          return
-        }
-        guard let cancellationReason = { () -> JobCancellationReason? in
-          switch job.status {
-          case .paused:
-            return .statusChangedToPaused
-          case .delayed:
-            return .statusChangedToDelayed
-          case .waiting:
-            return .statusChangedToWaiting
-          default:
-            // TODO: It may be possible for .completed/.failed statuses to be encountered
-            // here, which isn't good. We need to either prevent that or handle
-            // it in a graceful manner. Theoretically, any completed/failed job
-            // should have already been removed when the processor indicated it
-            // completed/failed.
-            return nil
+      lt += SignalProducer(processorsToCancelByID)
+        .flatMap(.concat) { kvp -> SignalProducer<Void, JobQueueError> in
+          // If there is no job in the queue with the job id associated with the
+          // processor, cancel the processor with `.removed` as the reason.
+          // This means the job is no longer with us and processing should stop.
+          guard let job = sortedJobs.first(where: { $0.id == kvp.key }) else {
+            return kvp.value.change(status: .cancelled(.removed))
+              .on(
+                value: { _ in
+                  self._events.input.send(value: .cancelledProcessing(nil, .removed))
+                }
+              ).map { _ in }
           }
-        }() else {
-          return
+          // Determine the cancellation reason based on the job's current status
+          // e.g. If the job's status has been set to `.paused`, the cancellation
+          // reason should reflect that.
+          // If no cancellation reason, it means the processor is already in some
+          // sort of finished state (completed, failed) so we just send void.
+          guard let cancellationReason = self.getCancellationReason(given: job.status) else {
+            return SignalProducer<Void, JobQueueError>(value: ())
+          }
+          // Cancel the processor using the determined cancellation reason
+          return kvp.value.change(status: .cancelled(cancellationReason))
+            .on(
+              value: { _ in
+                self._events.input.send(value: .cancelledProcessing(job, cancellationReason))
+              }
+            )
+            .map { _ in }
         }
-        kvp.value.cancel(reason: cancellationReason)
-        self._events.input.send(value: .cancelledProcessing(job, cancellationReason))
-      }
-
-      // Cleanup processors
-      self.processors.remove(processors: processorsToCancelByID.keys.map { $0 })
-
-      // Process jobs to process
-      lt += SignalProducer(
-        jobsToProcessByName.reduce(into: [Job]()) { acc, kvp in
-          acc.append(contentsOf: kvp.value.filter { !self.processors.isProcessing(job: $0) })
+        .collect() // Collect all the Void results, we don't care about them
+        .on(value: { _ in
+          // Remove the cancelled processors
+          self.processors.remove(processors: processorsToCancelByID.keys.map { $0 })
+        })
+        .then(
+          SignalProducer(
+            jobsToProcessByName.reduce(into: [Job]()) { acc, kvp in
+              acc.append(contentsOf: kvp.value.filter { !self.processors.isProcessing(job: $0) })
+            }
+          ).flatMap(.concat) {
+            self.beginProcessing(job: $0)
+          }
+        )
+        .startWithCompleted {
+          o.send(value: ())
+          o.sendCompleted()
         }
-      ).flatMap(.concat) {
-        self.beginProcessing(job: $0)
-      }.startWithCompleted {
-        o.send(value: ())
-        o.sendCompleted()
-      }
     }
     .start(on: self.schedulers.synchronize)
+  }
+
+  func getCancellationReason(given status: JobStatus) -> JobCancellationReason? {
+    switch status {
+    case .paused:
+      return .statusChangedToPaused
+    case .delayed:
+      return .statusChangedToDelayed
+    case .waiting:
+      return .statusChangedToWaiting
+    default:
+      // TODO: It may be possible for .completed/.failed statuses to be encountered
+      // here, which isn't good. We need to either prevent that or handle
+      // it in a graceful manner. Theoretically, any completed/failed job
+      // should have already been removed when the processor indicated it
+      // completed/failed.
+      return nil
+    }
   }
 
   /**
@@ -387,8 +409,8 @@ private extension JobQueue {
 
    - Parameter jobs: the list of jobs to reduce
    */
-  func processable(jobs: [Job]) -> [JobName: [Job]] {
-    return jobs.reduce(into: [JobName: [Job]]()) { acc, job in
+  func processable(jobs: [Job]) -> [JobType: [Job]] {
+    return jobs.reduce(into: [JobType: [Job]]()) { acc, job in
       guard let configuration = self.processors.configurations[job.type] else {
         return
       }
@@ -423,6 +445,10 @@ private extension JobQueue {
   func beginProcessing(job: Job) -> SignalProducer<Job, JobQueueError> {
     return
       self.get(job.id)
+        /// Only jobs with a status of `active` or `waiting` can be active.
+        /// `active` jobs must be considererd since active jobs prior to the application
+        /// terminating will need to be restarted. They are ignored if an existing
+        /// processor is found for them in a subsequent step.
         .filter {
           self.logger.trace("Queue \(self.name) beginProcessing job \(($0.id, $0.status))")
           switch $0.status {
@@ -432,43 +458,54 @@ private extension JobQueue {
             return false
           }
         }
+        /// Set the status to active. `set(:status:)` is a no-op if the status is
+        /// already active.
         .flatMap(.concat) { self.set($0, status: .active) }
-        .on(
-          value: { _job in
-            guard let processor = self.processors.activeProcessor(for: _job) else {
-              return
-            }
-            processor.process(job: _job, queue: self) { result in
-              self.schedulers.synchronize.schedule {
-                switch result {
-                case .success:
-                  self.logger.trace("Queue (\(self.name)) job \(_job.id) processed")
-                  self.set(_job.id, status: .completed(at: Date()))
-                    .on(
-                      value: {
-                        self.processors.remove(processors: [$0.id])
-                        self.logger.trace("Queue (\(self.name)) removed processor for job \($0.id)")
-                        self._events.input.send(value: .finishedProcessing($0))
-                      }
-                    )
-                    .start()
-                case .failure(let error):
-                  self.logger.trace("Queue (\(self.name)) job \(_job.id) failed processing \(error.localizedDescription)")
-                  self.set(_job.id, status: .failed(at: Date(), message: error.localizedDescription))
-                    .on(
-                      value: {
-                        self.processors.remove(processors: [$0.id])
-                        self.logger.trace("Queue (\(self.name)) removed processor for job \($0.id)")
-                        self._events.input.send(value: .failedProcessing($0, error))
-                      }
-                    )
-                    .start()
-                }
-                self.logger.trace("Queue (\(self.name)) began processing job \(_job.id)")
-                self._events.input.send(value: .beganProcessing(job))
-              }
-            }
+        /// Start processing if we have a processor for the job and it is not already
+        /// active
+        .flatMap(.concat) { _job -> SignalProducer<Job, JobQueueError> in
+          guard let processor = self.processors.activeProcessor(for: _job) else {
+            return SignalProducer<Job, JobQueueError>(value: _job)
           }
-        )
+          /// Skip if the processor is already active
+          guard processor.status.value != .active(job: _job, queue: self) else {
+            return SignalProducer<Job, JobQueueError>(value: _job)
+          }
+          /// Start monitoring the processor's status for `completed` and `failed`.
+          /// When those statuses are found, update the job's status, then report
+          /// the event.
+          /// **NOTE**: While much of this could be moved to the `JobProcessor`
+          /// itself, we'd still need to pipe the `finished/failedProcessing` events.
+          /// Probably not worth the effort or added complexity.
+          self.disposables += processor.status.producer
+            .flatMap(.concat) { processorStatus -> SignalProducer<Void, JobQueueError> in
+              switch processorStatus {
+              case .completed(let date):
+                return self.set(_job.id, status: .completed(at: date))
+                  .on(
+                    value: {
+                      self.logger.trace("Queue (\(self.name)) finished processing job \($0.id)")
+                      self._events.input.send(value: .finishedProcessing($0))
+                    }
+                  )
+                  .map { _ in }
+              case .failed(let date, let error):
+                return self.set(_job.id, status: .failed(at: date, message: error.localizedDescription))
+                  .on(
+                    value: {
+                      self.logger.trace("Queue (\(self.name)) failed processing job \($0.id)")
+                      self._events.input.send(value: .failedProcessing($0, error))
+                    }
+                  )
+                  .map { _ in }
+              default: return SignalProducer<Void, JobQueueError>(value: ())
+              }
+            }.start()
+
+          /// Activate the processor
+          return processor
+            .change(status: .active(job: job, queue: self))
+            .map { _ in _job }
+        }
   }
 }

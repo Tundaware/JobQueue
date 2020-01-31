@@ -12,7 +12,7 @@ import JobQueueCore
 @objc(JobCoreDataStorageEntity)
 public class JobCoreDataStorageEntity: NSManagedObject {
   @NSManaged var id: JobID!
-  @NSManaged var type: JobName!
+  @NSManaged var type: JobType!
   @NSManaged var queue: JobQueueName!
   @NSManaged var job: Data!
 

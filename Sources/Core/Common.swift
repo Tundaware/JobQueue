@@ -5,7 +5,7 @@
 import Foundation
 
 public typealias JobID = String
-public typealias JobName = String
+public typealias JobType = String
 public typealias JobQueueName = String
 
 public func notImplemented(_ message: @autoclosure () -> String = String(), file: StaticString = #file, line: UInt = #line) -> Never {
@@ -28,7 +28,7 @@ public enum JobCancellationReason {
 }
 
 public enum JobQueueError: Error {
-  case abstractFunction
+  case abstractFunction(String)
   case noQueueProvided
   case queueNotFound(JobQueueName)
   case jobNotFound(JobID, JobQueueName)
