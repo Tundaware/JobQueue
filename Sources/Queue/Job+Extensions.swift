@@ -43,4 +43,22 @@ extension Job {
       progress: progress
     )
   }
+
+  public init<T, Payload>(
+    _ type: T.Type,
+    job: Job,
+    payload: Payload
+  ) throws where T: Processor<Payload> {
+    try self.init(
+      T.self,
+      id: job.id,
+      queueName: job.queueName,
+      payload: payload,
+      queuedAt: job.queuedAt,
+      status: job.status,
+      schedule: job.schedule,
+      order: job.order,
+      progress: job.progress
+    )
+  }
 }

@@ -8,6 +8,15 @@ import ReactiveSwift
 import JobQueueCore
 #endif
 
+public protocol QueueInteraction {
+  func update<T, Payload>(
+    _ processorType: T.Type,
+    id: Job.ID,
+    synchronize: Bool,
+    modifyPayload: @escaping (Payload) -> Payload
+  ) -> SignalProducer<Job, JobQueueError> where T: Job.Processor<Payload>
+}
+
 public enum QueueEvent {
   case resumed
   case suspended
@@ -276,6 +285,28 @@ public extension Queue {
    */
   func remove(_ job: Job, synchronize: Bool = true) -> SignalProducer<Job, JobQueueError> {
     self.transaction(synchronize: synchronize) { try $0.remove(job).get() }
+  }
+}
+
+extension Queue: QueueInteraction {
+  public func update<T, Payload>(
+    _ processorType: T.Type,
+    id: Job.ID,
+    synchronize: Bool = true,
+    modifyPayload: @escaping (Payload) -> Payload
+  ) -> SignalProducer<Job, JobQueueError> where T: Job.Processor<Payload> {
+    return self.get(id).flatMap(.concat) { (job: Job) -> SignalProducer<Job, JobQueueError> in
+      do {
+        let newJob = try Job(
+          T.self,
+          job: job,
+          payload: modifyPayload(try T.deserialize(job.payload))
+        )
+        return self.store(newJob, synchronize: synchronize)
+      } catch {
+        return SignalProducer<Job, JobQueueError>(error: .from(error))
+      }
+    }
   }
 }
 
