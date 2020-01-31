@@ -161,29 +161,26 @@ extension JobProcessor: AnyJobProcessor {
 
       switch status {
       case .new:
-        switch currentStatus {
-        case .new:
-          break
-        default:
-          nextStatus = status
-        }
+        // The processor starts as `new`, it should never be considered `new`
+        // after it's status has changed to anything else.
+        break
       case .active:
-        switch self.status.value {
+        switch currentStatus {
         case .new:
           nextStatus = status
         default:
           break
         }
       case .cancelled:
-        switch self.status.value {
+        switch currentStatus {
         case .new, .active:
           nextStatus = status
         default:
           break
         }
       case .completed, .failed:
-        switch self.status.value {
-        case .new, .active:
+        switch currentStatus {
+        case .active:
           nextStatus = status
         default:
           break
