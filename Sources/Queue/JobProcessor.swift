@@ -13,67 +13,69 @@ import JobQueueCore
 protocol AnyJobProcessor: class {
   static var jobType: Job.TypeName { get }
 
-  var status: Property<JobProcessorStatus> { get }
+  var status: Property<Job.ProcessorStatus> { get }
 
   init(logger: Logger)
 
-  func change(status: JobProcessorStatus) -> SignalProducer<Void, JobQueueError>
+  func change(status: Job.ProcessorStatus) -> SignalProducer<Void, JobQueueError>
   func process(job: Job, queue: Queue)
 }
 
-public enum JobProcessorStatus: CustomStringConvertible, Equatable {
+extension Job {
+  public enum ProcessorStatus: CustomStringConvertible, Equatable {
   /// The processor has been created and has not been acted on
-  case new
+    case new
   /// The processor is actively processing a job
-  case active(job: Job, queue: Queue)
+    case active(job: Job, queue: Queue)
   /// The processor is cancelled for some reason
-  case cancelled(JobCancellationReason)
+    case cancelled(JobCancellationReason)
   /// The processor has completed. This status is set by sub-classes
-  case completed(at: Date)
+    case completed(at: Date)
   /// The processor has failed. This status is set by sub-classes.
-  case failed(at: Date, error: JobQueueError)
+    case failed(at: Date, error: JobQueueError)
 
-  public var description: String {
-    switch self {
-    case .new: return "new"
-    case .active: return "active"
-    case .cancelled: return "cancelled"
-    case .completed: return "completed"
-    case .failed: return "failed"
+    public var description: String {
+      switch self {
+      case .new: return "new"
+      case .active: return "active"
+      case .cancelled: return "cancelled"
+      case .completed: return "completed"
+      case .failed: return "failed"
+      }
     }
-  }
 
-  /// Equatable implementation using simple equality, ignoring any associated values
-  ///
-  /// - Parameters:
-  ///   - lhs: first status to consider
-  ///   - rhs: second status to consider
-  public static func == (lhs: JobProcessorStatus, rhs: JobProcessorStatus) -> Bool {
-    switch lhs {
-    case .new:
-      switch rhs {
-      case .new: return true
-      default: return false
-      }
-    case .active:
-      switch rhs {
-      case .active: return true
-      default: return false
-      }
-    case .cancelled:
-      switch rhs {
-      case .cancelled: return true
-      default: return false
-      }
-    case .completed:
-      switch rhs {
-      case .completed: return true
-      default: return false
-      }
-    case .failed:
-      switch rhs {
-      case .failed: return true
-      default: return false
+    /// Equatable implementation using simple equality, ignoring any associated values
+    ///
+    /// - Parameters:
+    ///   - lhs: first status to consider
+    ///   - rhs: second status to consider
+    public static func == (lhs: ProcessorStatus, rhs: ProcessorStatus) -> Bool {
+      switch lhs {
+      case .new:
+        switch rhs {
+        case .new: return true
+        default: return false
+        }
+      case .active:
+        switch rhs {
+        case .active: return true
+        default: return false
+        }
+      case .cancelled:
+        switch rhs {
+        case .cancelled: return true
+        default: return false
+        }
+      case .completed:
+        switch rhs {
+        case .completed: return true
+        default: return false
+        }
+      case .failed:
+        switch rhs {
+        case .failed: return true
+        default: return false
+        }
       }
     }
   }
@@ -88,7 +90,7 @@ extension Job {
 
     private let scheduler = QueueScheduler()
 
-    private let _status = MutableProperty<JobProcessorStatus>(.new)
+    private let _status = MutableProperty<ProcessorStatus>(.new)
     public private(set) lazy var status = Property(capturing: _status)
 
     public let logger: Logger
@@ -156,10 +158,10 @@ extension Job.Processor: AnyJobProcessor {
   /// The status is only changed if it is permitted given the current status
   ///
   /// - Parameter status: the proposed new status
-  public func change(status: JobProcessorStatus) -> SignalProducer<Void, JobQueueError> {
+  public func change(status: Job.ProcessorStatus) -> SignalProducer<Void, JobQueueError> {
     return SignalProducer { o, lt in
       let currentStatus = self.status.value
-      var nextStatus: JobProcessorStatus?
+      var nextStatus: Job.ProcessorStatus?
 
       switch status {
       case .new:
