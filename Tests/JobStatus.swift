@@ -15,7 +15,7 @@ class JobStatusTests: QuickSpec {
   override func spec() {
     describe("when completed") {
       let date = Date(timeIntervalSince1970: 25)
-      let status = JobStatus.completed(at: date)
+      let status = Job.Status.completed(at: date)
 
       the("isCompleted property should be true") {
         expect(status.isComplete).to(beTrue())
@@ -43,7 +43,7 @@ class JobStatusTests: QuickSpec {
 
     describe("when delayed") {
       let date = Date(timeIntervalSince1970: 50)
-      let status = JobStatus.delayed(until: date)
+      let status = Job.Status.delayed(until: date)
 
       the("isCompleted property should be false") {
         expect(status.isComplete).to(beFalse())
@@ -72,7 +72,7 @@ class JobStatusTests: QuickSpec {
     describe("when failed") {
       let date = Date(timeIntervalSince1970: 100)
       let message = "some error"
-      let status = JobStatus.failed(at: date, message: message)
+      let status = Job.Status.failed(at: date, message: message)
 
       the("isCompleted property should be false") {
         expect(status.isComplete).to(beFalse())

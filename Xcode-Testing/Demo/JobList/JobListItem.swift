@@ -5,7 +5,7 @@
 import JobQueue
 import SwiftUI
 
-extension JobStatus: CustomStringConvertible {
+extension Job.Status: CustomStringConvertible {
   public var description: String {
     switch self {
     case .active: return "active"

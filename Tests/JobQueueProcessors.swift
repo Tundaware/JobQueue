@@ -11,14 +11,14 @@ import JobQueueCore
 
 @testable import JobQueue
 
-class JobQueueProcessorsTests: QuickSpec {
+class QueueProcessorsTests: QuickSpec {
   override func spec() {
     describe("activeProcessorsByID") {
-      var processors: JobQueueProcessors!
+      var processors: Queue.Processors!
 
       beforeEach {
-        processors = JobQueueProcessors()
-        processors.configurations[Processor1.jobType] = JobProcessorConfiguration(Processor1.self, concurrency: 5)
+        processors = Queue.Processors()
+        processors.configurations[Processor1.jobType] = .init(Processor1.self, concurrency: 5)
         processors.activeProcessor(for: try! Job(Processor1.self, id: "0", queueName: "", payload: "test"))
         processors.activeProcessor(for: try! Job(Processor1.self, id: "1", queueName: "", payload: "test"))
         processors.activeProcessor(for: try! Job(Processor1.self, id: "2", queueName: "", payload: "test"))
@@ -30,11 +30,11 @@ class JobQueueProcessorsTests: QuickSpec {
     }
 
     describe("remove") {
-      var processors: JobQueueProcessors!
+      var processors: Queue.Processors!
 
       beforeEach {
-        processors = JobQueueProcessors()
-        processors.configurations[Processor1.jobType] = JobProcessorConfiguration(Processor1.self, concurrency: 5)
+        processors = Queue.Processors()
+        processors.configurations[Processor1.jobType] = .init(Processor1.self, concurrency: 5)
         processors.activeProcessor(for: try! Job(Processor1.self, id: "0", queueName: "", payload: "test"))
         processors.activeProcessor(for: try! Job(Processor1.self, id: "1", queueName: "", payload: "test"))
         processors.activeProcessor(for: try! Job(Processor1.self, id: "2", queueName: "", payload: "test"))
@@ -48,11 +48,11 @@ class JobQueueProcessorsTests: QuickSpec {
     }
 
     describe("activeProcessor") {
-      var processors: JobQueueProcessors!
+      var processors: Queue.Processors!
       var testJobs: [Job]!
 
       beforeEach {
-        processors = JobQueueProcessors()
+        processors = Queue.Processors()
         testJobs = [
           try! Job(Processor1.self, id: "0", queueName: "", payload: "test"),
           try! Job(Processor1.self, id: "1", queueName: "", payload: "test"),

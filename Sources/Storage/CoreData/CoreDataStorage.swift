@@ -11,9 +11,9 @@ import JobQueueCore
 
 @objc(JobCoreDataStorageEntity)
 public class JobCoreDataStorageEntity: NSManagedObject {
-  @NSManaged var id: JobID!
-  @NSManaged var type: JobType!
-  @NSManaged var queue: JobQueueName!
+  @NSManaged var id: Job.ID!
+  @NSManaged var type: Job.TypeName!
+  @NSManaged var queue: QueueName!
   @NSManaged var job: Data!
 
   func setJob(_ job: Job) throws {
@@ -46,7 +46,7 @@ public class CoreDataStorage: JobStorage {
   }
 
   public func transaction<T>(
-    queue: JobQueueProtocol,
+    queue: QueueIdentity,
     _ closure: @escaping (JobStorageTransaction) throws -> T
   ) -> SignalProducer<T, JobQueueError> {
     return SignalProducer { o, lt in
@@ -96,7 +96,7 @@ extension NSManagedObjectID {
   }
 }
 extension NSManagedObject {
-  static func with(id: String, queue: JobQueueProtocol, in context: NSManagedObjectContext) -> Self? {
+  static func with(id: String, queue: QueueIdentity, in context: NSManagedObjectContext) -> Self? {
     guard let managedObjectID = NSManagedObjectID.from(id, in: context) else {
       return nil
     }

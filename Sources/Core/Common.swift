@@ -4,9 +4,7 @@
 
 import Foundation
 
-public typealias JobID = String
-public typealias JobType = String
-public typealias JobQueueName = String
+public typealias QueueName = String
 
 public func notImplemented(_ message: @autoclosure () -> String = String(), file: StaticString = #file, line: UInt = #line) -> Never {
   let message = message()
@@ -30,10 +28,10 @@ public enum JobCancellationReason {
 public enum JobQueueError: Error {
   case abstractFunction(String)
   case noQueueProvided
-  case queueNotFound(JobQueueName)
-  case jobNotFound(JobID, JobQueueName)
-  case payloadDeserialization(JobID, JobQueueName, Error)
-  case payloadSerialization(JobID, JobQueueName, Error)
+  case queueNotFound(QueueName)
+  case jobNotFound(Job.ID, QueueName)
+  case payloadDeserialization(Job.ID, QueueName, Error)
+  case payloadSerialization(Job.ID, QueueName, Error)
   case jobDeserializationFailed
   case jobSerializationFailed
   case storageNoDatabaseReference

@@ -19,7 +19,7 @@ public class CouchbaseLiteStorage: JobStorage {
     self.logger = logger
   }
   public func transaction<T>(
-    queue: JobQueueProtocol,
+    queue: QueueIdentity,
     _ closure: @escaping (JobStorageTransaction) throws -> T
   ) -> SignalProducer<T, JobQueueError> {
     return SignalProducer { o, lt in

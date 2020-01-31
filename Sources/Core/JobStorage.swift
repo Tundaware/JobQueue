@@ -7,7 +7,7 @@ import ReactiveSwift
 
 public protocol JobStorage {
   func transaction<T>(
-    queue: JobQueueProtocol,
+    queue: QueueIdentity,
     _ closure: @escaping (JobStorageTransaction) throws -> T
   ) -> SignalProducer<T, JobQueueError>
 }

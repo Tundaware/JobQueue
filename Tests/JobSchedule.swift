@@ -20,12 +20,12 @@ class JobScheduleTests: QuickSpec {
         let dateInterval = DateInterval(start: startDate, end: endDate)
 
         the("dateInterval property should match the provided dateInterval, if provided") {
-          let schedule = JobSchedule.timeInterval(5, dateInterval)
+          let schedule = Job.Schedule.timeInterval(5, dateInterval)
           expect(schedule.dateInterval).to(equal(dateInterval))
         }
         
         the("dateInterval property should be correct when excluded") {
-          let schedule = JobSchedule.timeInterval(5, nil)
+          let schedule = Job.Schedule.timeInterval(5, nil)
           let expectation = DateInterval(start: Date.distantPast, end: Date.distantFuture)
           expect(schedule.dateInterval).to(equal(expectation))
         }

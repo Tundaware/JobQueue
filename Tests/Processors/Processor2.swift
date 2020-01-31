@@ -11,8 +11,8 @@ import JobQueue
 struct TestPayload1: Codable, Equatable {
   var name: String
 }
-class Processor2: JobProcessor<TestPayload1> {
-  override func process(job: Job, payload: TestPayload1, queue: JobQueue) {
+class Processor2: Job.Processor<TestPayload1> {
+  override func process(job: Job, payload: TestPayload1, queue: Queue) {
     
   }
 }

@@ -8,13 +8,13 @@ import ReactiveSwift
 import JobQueueCore
 #endif
 
-public enum JobQueueEvent {
+public enum QueueEvent {
   case resumed
   case suspended
   case added(Job)
   case updated(Job)
   case removed(Job)
-  case registeredProcessor(JobType, concurrency: Int)
+  case registeredProcessor(Job.TypeName, concurrency: Int)
   case updatedStatus(Job)
   case updatedProgress(Job)
   case beganProcessing(Job)
@@ -23,7 +23,7 @@ public enum JobQueueEvent {
   case finishedProcessing(Job)
 }
 
-public final class JobQueue: JobQueueProtocol {
+public final class Queue: QueueIdentity {
   public let name: String
 
   private let _isActive = MutableProperty(false)
@@ -36,14 +36,14 @@ public final class JobQueue: JobQueueProtocol {
   private let _isSynchronizePending = MutableProperty(false)
   private let isSynchronizePending: Property<Bool>
 
-  private let _events = Signal<JobQueueEvent, Never>.pipe()
+  private let _events = Signal<QueueEvent, Never>.pipe()
   /// An observable stream of events produced by the queue
-  public let events: Signal<JobQueueEvent, Never>
+  public let events: Signal<QueueEvent, Never>
 
   private let shouldSynchronize = Signal<Void, Never>.pipe()
-  internal let schedulers: JobQueueSchedulers
+  internal let schedulers: Schedulers
   private let storage: JobStorage
-  private let processors = JobQueueProcessors()
+  private let processors = Processors()
   private let sorter: JobSorter
   private let delayStrategy: JobQueueDelayStrategy
   private let logger: Logger
@@ -52,7 +52,7 @@ public final class JobQueue: JobQueueProtocol {
 
   public init(
     name: String,
-    schedulers: JobQueueSchedulers,
+    schedulers: Schedulers,
     storage: JobStorage,
     sorter: JobSorter = DefaultJobSorter(),
     delayStrategy: JobQueueDelayStrategy = JobQueueDelayPollingStrategy(),
@@ -126,7 +126,7 @@ public final class JobQueue: JobQueueProtocol {
 }
 
 /// `isActive` mutation functions
-public extension JobQueue {
+public extension Queue {
   /**
    Resumes the queue.
 
@@ -180,7 +180,7 @@ public extension JobQueue {
 }
 
 // Job access
-public extension JobQueue {
+public extension Queue {
   func transaction<T>(synchronize: Bool = false, _ closure: @escaping (JobStorageTransaction) throws -> T) -> SignalProducer<T, JobQueueError> {
     return self.storage.transaction(queue: self, closure)
       .on(completed: {
@@ -190,7 +190,7 @@ public extension JobQueue {
       })
   }
 
-  func set(_ id: JobID, status: JobStatus) -> SignalProducer<Job, JobQueueError> {
+  func set(_ id: Job.ID, status: Job.Status) -> SignalProducer<Job, JobQueueError> {
     return self.transaction(synchronize: true) {
       var job = (try $0.get(id).get())
       guard job.status != status else {
@@ -204,7 +204,7 @@ public extension JobQueue {
     })
   }
 
-  func set(_ job: Job, status: JobStatus) -> SignalProducer<Job, JobQueueError> {
+  func set(_ job: Job, status: Job.Status) -> SignalProducer<Job, JobQueueError> {
     guard job.status != status else {
       return SignalProducer(value: job)
     }
@@ -220,7 +220,7 @@ public extension JobQueue {
    - Parameter id: the id of the job to get
    - Returns: A `SignalProducer<Job, Error>` that sends the job or, if not found, an error
    */
-  func get(_ id: JobID) -> SignalProducer<Job, JobQueueError> {
+  func get(_ id: Job.ID) -> SignalProducer<Job, JobQueueError> {
     self.transaction { try $0.get(id).get() }
   }
 
@@ -254,10 +254,10 @@ public extension JobQueue {
    a `JobCancellationReason` of `removed`.
 
    - Parameter id: the id of the job to remove
-   - Returns: A `SignalProducer<JobID, Error>` that sends the id or any error
+   - Returns: A `SignalProducer<Job.ID, Error>` that sends the id or any error
      from the underlying storage provider
    */
-  func remove(_ id: JobID, synchronize: Bool = true) -> SignalProducer<JobID, JobQueueError> {
+  func remove(_ id: Job.ID, synchronize: Bool = true) -> SignalProducer<Job.ID, JobQueueError> {
     self.transaction(synchronize: synchronize) { try $0.remove(id).get() }
   }
 
@@ -279,7 +279,7 @@ public extension JobQueue {
   }
 }
 
-public extension JobQueue {
+public extension Queue {
   /**
    Registers a `JobProcessor` type with the queue
 
@@ -296,15 +296,18 @@ public extension JobQueue {
      - concurrency: the maximum number of instances of this `JobProcessor` that can
      simultaneously process jobs. defaults to `1`.
    */
-  func register<T, Payload>(_ type: T.Type, concurrency: Int = 1) where T: JobProcessor<Payload> {
-    self.processors.configurations[T.jobType] =
-      JobProcessorConfiguration(type, concurrency: concurrency, logger: self.logger)
+  func register<T, Payload>(_ type: T.Type, concurrency: Int = 1) where T: Job.Processor<Payload> {
+    self.processors.configurations[T.jobType] = .init(
+      type,
+      concurrency: concurrency,
+      logger: self.logger
+    )
 
     self._events.input.send(value: .registeredProcessor(T.jobType, concurrency: concurrency))
   }
 }
 
-private extension JobQueue {
+private extension Queue {
   func scheduleSynchronization() {
     guard !self.isSynchronizePending.value else {
       return
@@ -385,7 +388,7 @@ private extension JobQueue {
     .start(on: self.schedulers.synchronize)
   }
 
-  func getCancellationReason(given status: JobStatus) -> JobCancellationReason? {
+  func getCancellationReason(given status: Job.Status) -> JobCancellationReason? {
     switch status {
     case .paused:
       return .statusChangedToPaused
@@ -409,8 +412,8 @@ private extension JobQueue {
 
    - Parameter jobs: the list of jobs to reduce
    */
-  func processable(jobs: [Job]) -> [JobType: [Job]] {
-    return jobs.reduce(into: [JobType: [Job]]()) { acc, job in
+  func processable(jobs: [Job]) -> [Job.TypeName: [Job]] {
+    return jobs.reduce(into: [Job.TypeName: [Job]]()) { acc, job in
       guard let configuration = self.processors.configurations[job.type] else {
         return
       }

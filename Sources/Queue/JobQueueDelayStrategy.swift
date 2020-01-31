@@ -12,7 +12,7 @@ public protocol JobQueueDelayStrategy {
   /// Invoked each time the queue is synchronized
   ///
   /// - Parameter jobs: the delayed jobs in the queue
-  func update(queue: JobQueue, jobs: [Job])
+  func update(queue: Queue, jobs: [Job])
 }
 
 /**
@@ -20,7 +20,7 @@ public protocol JobQueueDelayStrategy {
  there are delayed jobs in the queue.
  */
 public class JobQueueDelayPollingStrategy: JobQueueDelayStrategy {
-  private var disposablesByQueueName = [JobQueueName: Disposable]()
+  private var disposablesByQueueName = [QueueName: Disposable]()
   private let interval: DispatchTimeInterval
 
   public init(interval: TimeInterval = 5) {
@@ -40,7 +40,7 @@ public class JobQueueDelayPollingStrategy: JobQueueDelayStrategy {
     - queue: the queue the update applies to
     - jobs: the delayed jobs in the queue
    */
-  public func update(queue: JobQueue, jobs: [Job]) {
+  public func update(queue: Queue, jobs: [Job]) {
     let disposable = disposablesByQueueName[queue.name]
     guard let earliestDelayedJob = jobs.earliestDelayedJob else {
       if let disposable = disposable {

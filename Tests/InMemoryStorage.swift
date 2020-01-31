@@ -19,7 +19,7 @@ import ReactiveSwift
 class JobQueueInMemoryStorageTests: QuickSpec {
   override func spec() {
     var storage: JobStorage!
-    var queue: JobQueueProtocol!
+    var queue: QueueIdentity!
 
     beforeEach {
       queue = Queue()
@@ -107,6 +107,6 @@ class JobQueueInMemoryStorageTests: QuickSpec {
   }
 }
 
-private class Queue: JobQueueProtocol {
+private class Queue: QueueIdentity {
   let name: String = "test queue"
 }

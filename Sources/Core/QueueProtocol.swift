@@ -4,6 +4,6 @@
 
 import Foundation
 
-public protocol JobQueueProtocol {
+public protocol QueueIdentity {
   var name: String { get }
 }

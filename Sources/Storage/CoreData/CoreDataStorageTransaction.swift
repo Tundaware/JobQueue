@@ -11,7 +11,7 @@ import JobQueueCore
 
 extension CoreDataStorage {
   public class Transaction: JobStorageTransaction {
-    private var queue: JobQueueProtocol?
+    private var queue: QueueIdentity?
     private let logger: Logger
     private let context: NSManagedObjectContext
     private typealias Entity = JobCoreDataStorageEntity
@@ -19,7 +19,7 @@ extension CoreDataStorage {
     internal let id = UUID().uuidString
 
     public init(
-      queue: JobQueueProtocol? = nil,
+      queue: QueueIdentity? = nil,
       context: NSManagedObjectContext,
       logger: Logger
     ) {
@@ -28,7 +28,7 @@ extension CoreDataStorage {
       self.logger = logger
     }
 
-    private func getEntities(queue: JobQueueProtocol?) -> Result<[Entity], JobQueueError> {
+    private func getEntities(queue: QueueIdentity?) -> Result<[Entity], JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
         return .failure(.noQueueProvided)
       }
@@ -45,7 +45,7 @@ extension CoreDataStorage {
       }
     }
 
-    private func getEntity(_ id: JobID, queue: JobQueueProtocol?) -> Result<Entity, JobQueueError> {
+    private func getEntity(_ id: Job.ID, queue: QueueIdentity?) -> Result<Entity, JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
         return .failure(.noQueueProvided)
       }
@@ -64,7 +64,7 @@ extension CoreDataStorage {
       }
     }
 
-    public func get(_ id: JobID, queue: JobQueueProtocol?) -> Result<Job, JobQueueError> {
+    public func get(_ id: Job.ID, queue: QueueIdentity?) -> Result<Job, JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
         return .failure(.noQueueProvided)
       }
@@ -81,7 +81,7 @@ extension CoreDataStorage {
       }
     }
 
-    public func getAll(queue: JobQueueProtocol?) -> Result<[Job], JobQueueError> {
+    public func getAll(queue: QueueIdentity?) -> Result<[Job], JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
         return .failure(.noQueueProvided)
       }
@@ -98,14 +98,14 @@ extension CoreDataStorage {
       }
     }
 
-    public func store(_ job: Job, queue: JobQueueProtocol?) -> Result<Job, JobQueueError> {
+    public func store(_ job: Job, queue: QueueIdentity?) -> Result<Job, JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
         return .failure(.noQueueProvided)
       }
       let entityResult = self.getEntity(job.id, queue: queue)
       switch entityResult {
       case .success(let entity):
-        // TODO: Guard for entity.jobId matching job.id
+        // TODO: Guard for entity.Job.ID matching job.id
         // TODO: Guard for entity.jobQueueName matching queue.name
         do {
           try entity.setJob(job)
@@ -130,7 +130,7 @@ extension CoreDataStorage {
       }
     }
 
-    public func remove(_ id: JobID, queue: JobQueueProtocol?) -> Result<JobID, JobQueueError> {
+    public func remove(_ id: Job.ID, queue: QueueIdentity?) -> Result<Job.ID, JobQueueError> {
       let result = self.getEntity(id, queue: queue)
       switch result {
       case .success(let entity):
@@ -146,7 +146,7 @@ extension CoreDataStorage {
       }
     }
 
-    public func remove(_ job: Job, queue: JobQueueProtocol?) -> Result<Job, JobQueueError> {
+    public func remove(_ job: Job, queue: QueueIdentity?) -> Result<Job, JobQueueError> {
       let result = self.getEntity(job.id, queue: queue)
       switch result {
       case .success(let entity):
@@ -162,7 +162,7 @@ extension CoreDataStorage {
       }
     }
 
-    public func removeAll(queue: JobQueueProtocol?) -> Result<Void, JobQueueError> {
+    public func removeAll(queue: QueueIdentity?) -> Result<Void, JobQueueError> {
       let result = self.getEntities(queue: queue)
       switch result {
       case .success(let entities):

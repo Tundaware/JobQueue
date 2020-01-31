@@ -4,80 +4,86 @@
 
 import Foundation
 
-public enum JobStatus: Equatable {
-  case waiting
-  case active
-  case completed(at: Date)
-  case delayed(until: Date)
-  case failed(at: Date, message: String)
-  case paused
+extension Job {
+  public enum Status: Equatable {
+    case waiting
+    case active
+    case completed(at: Date)
+    case delayed(until: Date)
+    case failed(at: Date, message: String)
+    case paused
 
-  public var isActive: Bool {
-    switch self {
-    case .active:
-      return true
-    default:
-      return false
+    public var isActive: Bool {
+      switch self {
+      case .active:
+        return true
+      default:
+        return false
+      }
     }
-  }
 
-  public var completedAt: Date? {
-    switch self {
-    case .completed(let date):
-      return date
-    default: return nil
+    public var completedAt: Date? {
+      switch self {
+      case .completed(let date):
+        return date
+      default: return nil
+      }
     }
-  }
-  public var isComplete: Bool {
-    switch self {
-    case .completed:
-      return true
-    default:
-      return false
-    }
-  }
 
-  public var failedAt: Date? {
-    switch self {
-    case .failed(let date, _):
-      return date
-    default: return nil
+    public var isComplete: Bool {
+      switch self {
+      case .completed:
+        return true
+      default:
+        return false
+      }
     }
-  }
-  public var failedMessage: String? {
-    switch self {
-    case .failed(_, let message):
-      return message
-    default: return nil
-    }
-  }
-  public var isFailed: Bool {
-    switch self {
-    case .failed:
-      return true
-    default:
-      return false
-    }
-  }
 
-  public var delayedUntil: Date? {
-    switch self {
-    case .delayed(let date):
-      return date
-    default: return nil
+    public var failedAt: Date? {
+      switch self {
+      case .failed(let date, _):
+        return date
+      default: return nil
+      }
     }
-  }
-  public var isDelayed: Bool {
-    switch self {
-    case .delayed:
-      return true
-    default:
-      return false
+
+    public var failedMessage: String? {
+      switch self {
+      case .failed(_, let message):
+        return message
+      default: return nil
+      }
+    }
+
+    public var isFailed: Bool {
+      switch self {
+      case .failed:
+        return true
+      default:
+        return false
+      }
+    }
+
+    public var delayedUntil: Date? {
+      switch self {
+      case .delayed(let date):
+        return date
+      default: return nil
+      }
+    }
+
+    public var isDelayed: Bool {
+      switch self {
+      case .delayed:
+        return true
+      default:
+        return false
+      }
     }
   }
 }
 
-extension JobStatus: Codable {
+extension Job.Status: Codable {
   enum CodingKeys: String, CodingKey {
     case simpleStatus
     case completedAt
@@ -85,6 +91,7 @@ extension JobStatus: Codable {
     case failedAt
     case failedMessage
   }
+
   enum SimpleStatus: String, Codable {
     case active
     case waiting
@@ -93,7 +100,7 @@ extension JobStatus: Codable {
     case completed
     case delayed
 
-    func toStatus(from values: KeyedDecodingContainer<JobStatus.CodingKeys>) throws -> JobStatus {
+    func toStatus(from values: KeyedDecodingContainer<Job.Status.CodingKeys>) throws -> Job.Status {
       switch self {
       case .active: return .active
       case .waiting: return .waiting
@@ -105,7 +112,7 @@ extension JobStatus: Codable {
       }
     }
 
-    static func from(status: JobStatus) -> Self {
+    static func from(status: Job.Status) -> Self {
       switch status {
       case .active: return .active
       case .waiting: return .waiting

@@ -16,14 +16,14 @@ private func randomString() -> String { UUID().uuidString }
 
 class JobQueueTests: QuickSpec {
   override func spec() {
-    var queue: JobQueue!
-    var schedulers: JobQueueSchedulers!
+    var queue: Queue!
+    var schedulers: Queue.Schedulers!
     var storage: JobStorage!
 
     beforeEach {
-      schedulers = JobQueueSchedulers()
+      schedulers = Queue.Schedulers()
       storage = TestJobStorage(scheduler: schedulers.storage)
-      queue = JobQueue(name: randomString(),
+      queue = Queue(name: randomString(),
                        schedulers: schedulers,
                        storage: storage,
                        delayStrategy: JobQueueDelayPollingStrategy(interval: 0.25))
@@ -141,7 +141,7 @@ class JobQueueTests: QuickSpec {
           var disposable: Disposable?
           waitUntil(timeout: 5) { done in
             let ids = Set(jobs.map { $0.id })
-            var completed = Set<JobID>()
+            var completed = Set<Job.ID>()
 
             disposable = queue.events.producer
               .startWithValues { event in

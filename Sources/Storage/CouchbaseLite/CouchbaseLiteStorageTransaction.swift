@@ -12,11 +12,11 @@ import JobQueueCore
 
 extension CouchbaseLiteStorage {
   public class Transaction: JobStorageTransaction {
-    let queue: JobQueueProtocol?
+    let queue: QueueIdentity?
     let database: Database
     let logger: Logger
 
-    public init(queue: JobQueueProtocol? = nil, database: Database, logger: Logger) {
+    public init(queue: QueueIdentity? = nil, database: Database, logger: Logger) {
       self.queue = queue
       self.database = database
       self.logger = logger
@@ -26,11 +26,11 @@ extension CouchbaseLiteStorage {
       return self.key(from: job.id, queueName: job.queueName)
     }
 
-    private func key(from id: JobID, queueName: JobQueueName) -> String {
+    private func key(from id: Job.ID, queueName: QueueName) -> String {
       return "\(queueName)/\(id)"
     }
 
-    public func removeAll(queue: JobQueueProtocol?) -> Swift.Result<Void, JobQueueError> {
+    public func removeAll(queue: QueueIdentity?) -> Swift.Result<Void, JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
         return .failure(.noQueueProvided)
       }
@@ -54,7 +54,7 @@ extension CouchbaseLiteStorage {
       }
     }
 
-    public func remove(_ job: Job, queue: JobQueueProtocol?) -> Swift.Result<Job, JobQueueError> {
+    public func remove(_ job: Job, queue: QueueIdentity?) -> Swift.Result<Job, JobQueueError> {
       switch self.remove(job.id, queue: queue) {
       case .success:
         return .success(job)
@@ -63,7 +63,7 @@ extension CouchbaseLiteStorage {
       }
     }
 
-    public func remove(_ id: JobID, queue: JobQueueProtocol?) -> Swift.Result<JobID, JobQueueError> {
+    public func remove(_ id: Job.ID, queue: QueueIdentity?) -> Swift.Result<Job.ID, JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
         return .failure(.noQueueProvided)
       }
@@ -79,7 +79,7 @@ extension CouchbaseLiteStorage {
       }
     }
 
-    public func store(_ job: Job, queue: JobQueueProtocol?) -> Swift.Result<Job, JobQueueError> {
+    public func store(_ job: Job, queue: QueueIdentity?) -> Swift.Result<Job, JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
         return .failure(.noQueueProvided)
       }
@@ -96,7 +96,7 @@ extension CouchbaseLiteStorage {
       }
     }
 
-    public func getAll(queue: JobQueueProtocol?) -> Swift.Result<[Job], JobQueueError> {
+    public func getAll(queue: QueueIdentity?) -> Swift.Result<[Job], JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
         return .failure(.noQueueProvided)
       }
@@ -119,7 +119,7 @@ extension CouchbaseLiteStorage {
       }
     }
 
-    public func get(_ id: JobID, queue: JobQueueProtocol?) -> Swift.Result<Job, JobQueueError> {
+    public func get(_ id: Job.ID, queue: QueueIdentity?) -> Swift.Result<Job, JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
         return .failure(.noQueueProvided)
       }

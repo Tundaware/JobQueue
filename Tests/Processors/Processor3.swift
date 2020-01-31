@@ -3,7 +3,10 @@
 ///
 
 import Foundation
+#if SWIFT_PACKAGE
+import JobQueueCore
+#endif
 import JobQueue
 
-class Processor3: JobProcessor<String> {
+class Processor3: Job.Processor<String> {
 }

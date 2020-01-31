@@ -22,7 +22,7 @@ class JobQueueCoreDataStorageTests: QuickSpec {
 
   override func spec() {
     var storage: JobStorage!
-    var queue: JobQueueProtocol!
+    var queue: QueueIdentity!
 
     beforeEach {
       waitUntil { done in
@@ -128,7 +128,7 @@ class JobQueueCoreDataStorageTests: QuickSpec {
   }
 }
 
-private class Queue: JobQueueProtocol {
+private class Queue: QueueIdentity {
   let name: String = "test queue"
 }
 

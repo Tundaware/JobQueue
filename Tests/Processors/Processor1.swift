@@ -9,12 +9,12 @@ import JobQueueCore
 import JobQueue
 import ReactiveSwift
 
-class Processor1: JobProcessor<String> {
+class Processor1: Job.Processor<String> {
   let scheduler = QueueScheduler()
 
   var isProcessing: Bool = false
 
-  override func process(job: Job, payload: String, queue: JobQueue) {
+  override func process(job: Job, payload: String, queue: Queue) {
     guard !isProcessing else {
       return
     }

@@ -15,7 +15,7 @@ class JobQueueCouchbaseLiteTests: QuickSpec {
 
   override func spec() {
     var storage: JobStorage!
-    var queue: JobQueueProtocol!
+    var queue: QueueIdentity!
 
     beforeEach {
       if self.database == nil {
@@ -114,6 +114,6 @@ class JobQueueCouchbaseLiteTests: QuickSpec {
   }
 }
 
-private class Queue: JobQueueProtocol {
+private class Queue: QueueIdentity {
   let name: String = "test queue"
 }

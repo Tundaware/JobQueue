@@ -9,15 +9,17 @@ import Foundation
 
 public struct Job: Codable {
   public typealias EncodedPayload = [UInt8]
+  public typealias ID = String
+  public typealias TypeName = String
 
   /// Unique name that identifies the type
-  public let type: JobType
+  public let type: TypeName
 
   /// Unique identifier of the job
-  public let id: JobID
+  public let id: Job.ID
 
   /// Queue name
-  public let queueName: JobQueueName
+  public let queueName: QueueName
 
   /// Raw payload bytes
   public let payload: EncodedPayload
@@ -26,10 +28,10 @@ public struct Job: Codable {
   public let queuedAt: Date
 
   /// The job's status
-  public var status: JobStatus
+  public var status: Status
 
   /// The job's schedule, only for scheduled jobs
-  public var schedule: JobSchedule?
+  public var schedule: Schedule?
 
   /// The specific order of the job in the queue. Sort order of jobs is by
   /// `order`, if not nil, then `queuedAt`
@@ -65,13 +67,13 @@ public struct Job: Codable {
   ///   - order: The job's manual execution order
   ///   - progress: The job's initial progress
   public init(
-    type: JobType,
-    id: JobID,
-    queueName: JobQueueName,
+    type: TypeName,
+    id: Job.ID,
+    queueName: QueueName,
     payload: EncodedPayload,
     queuedAt: Date = Date(),
-    status: JobStatus = .waiting,
-    schedule: JobSchedule? = nil,
+    status: Status = .waiting,
+    schedule: Schedule? = nil,
     order: Float? = nil,
     progress: Float? = nil
   ) {

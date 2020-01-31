@@ -9,7 +9,7 @@ import JobQueueCore
 #endif
 
 public class InMemoryStorage: JobStorage {
-  private var data = [JobQueueName: [JobID: Job]]()
+  private var data = [QueueName: [Job.ID: Job]]()
   private let scheduler: Scheduler
   private let logger: Logger
 
@@ -18,7 +18,7 @@ public class InMemoryStorage: JobStorage {
     self.logger = logger
   }
 
-  public func transaction<T>(queue: JobQueueProtocol, _ closure: @escaping (JobStorageTransaction) throws -> T) -> SignalProducer<T, JobQueueError> {
+  public func transaction<T>(queue: QueueIdentity, _ closure: @escaping (JobStorageTransaction) throws -> T) -> SignalProducer<T, JobQueueError> {
     return SignalProducer { o, lt in
       let transaction = Transaction(queue: queue, data: self.data, logger: self.logger)
 
@@ -26,17 +26,17 @@ public class InMemoryStorage: JobStorage {
         let result = try closure(transaction)
         transaction.changes.forEach { change in
           switch change {
-          case .stored(let queueName, let jobId, let job):
-            self.logger.trace("Storage applying .stored(\(queueName), \(jobId), \(job.status) from tx \(transaction.id)")
-            var jobs = self.data[queueName, default: [JobID: Job]()]
-            jobs[jobId] = job
+          case .stored(let queueName, let jobID, let job):
+            self.logger.trace("Storage applying .stored(\(queueName), \(jobID), \(job.status) from tx \(transaction.id)")
+            var jobs = self.data[queueName, default: [Job.ID: Job]()]
+            jobs[jobID] = job
             self.data[queueName] = jobs
-          case .removed(let queueName, let jobId, let job):
+          case .removed(let queueName, let jobID, let job):
             guard var jobs = self.data[queueName] else {
               return
             }
-            self.logger.trace("Storage applying .removed(\(queueName), \(jobId), \(job.status) from tx \(transaction.id)")
-            jobs.removeValue(forKey: jobId)
+            self.logger.trace("Storage applying .removed(\(queueName), \(jobID), \(job.status) from tx \(transaction.id)")
+            jobs.removeValue(forKey: jobID)
             self.data[queueName] = jobs
           case .removedAll(let queueName):
             self.logger.trace("Storage applying .removedAll(\(queueName)) from tx \(transaction.id)")

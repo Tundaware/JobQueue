@@ -18,7 +18,7 @@ class JobTests: QuickSpec {
     describe("status") {
       describe("when completed") {
         let date = Date(timeIntervalSince1970: 25)
-        let status = JobStatus.completed(at: date)
+        let status = Job.Status.completed(at: date)
         let job = try! Job(
           Processor1.self,
           id: randomString(),
@@ -44,7 +44,7 @@ class JobTests: QuickSpec {
       }
       describe("when delayed") {
         let date = Date(timeIntervalSince1970: 50)
-        let status = JobStatus.delayed(until: date)
+        let status = Job.Status.delayed(until: date)
         let job = try! Job(
           Processor1.self,
           id: randomString(),
@@ -71,7 +71,7 @@ class JobTests: QuickSpec {
       describe("when failed") {
         let date = Date(timeIntervalSince1970: 100)
         let message = "some failure"
-        let status = JobStatus.failed(at: date, message: message)
+        let status = Job.Status.failed(at: date, message: message)
         let job = try! Job(
           Processor1.self,
           id: randomString(),

@@ -14,8 +14,8 @@ import ReactiveSwift
 
 @testable import JobQueue
 
-private class ForeverProcessor: JobProcessor<String> {
-  override func process(job: Job, payload: String, queue: JobQueue) {}
+private class ForeverProcessor: Job.Processor<String> {
+  override func process(job: Job, payload: String, queue: Queue) {}
 }
 
 class JobProcessorTests: QuickSpec {
@@ -23,8 +23,8 @@ class JobProcessorTests: QuickSpec {
     describe("changing status") {
       describe("verify change constraints") {
         var job: Job!
-        var schedulers: JobQueueSchedulers!
-        var queue: JobQueue!
+        var schedulers: Queue.Schedulers!
+        var queue: Queue!
         var processor1: ForeverProcessor!
         var processor2: ForeverProcessor!
         var processor3: ForeverProcessor!
@@ -33,8 +33,8 @@ class JobProcessorTests: QuickSpec {
 
         beforeEach {
           job = try! Job(ForeverProcessor.self, id: "0", queueName: "test", payload: "test")
-          schedulers = JobQueueSchedulers()
-          queue = JobQueue(
+          schedulers = Queue.Schedulers()
+          queue = Queue(
             name: "test",
             schedulers: schedulers,
             storage: InMemoryStorage(scheduler: schedulers.storage)
@@ -129,16 +129,16 @@ class JobProcessorTests: QuickSpec {
       describe("processing") {
         context("with an `AnyJobProcessor`") {
           context("a job whose payload doesn't match the processor's Payload type") {
-            var queue: JobQueue!
-            var schedulers: JobQueueSchedulers!
+            var queue: Queue!
+            var schedulers: Queue.Schedulers!
             var storage: JobStorage!
             var processor: AnyJobProcessor!
 
             beforeEach {
-              schedulers = JobQueueSchedulers()
+              schedulers = Queue.Schedulers()
               storage = TestJobStorage(scheduler: schedulers.storage)
 
-              queue = JobQueue(name: "test",
+              queue = Queue(name: "test",
                                schedulers: schedulers,
                                storage: storage)
               processor = Processor2()
@@ -165,20 +165,20 @@ class JobProcessorTests: QuickSpec {
             }
           }
           context("that matches the processor's Payload type") {
-            var queue: JobQueue!
-            var schedulers: JobQueueSchedulers!
+            var queue: Queue!
+            var schedulers: Queue.Schedulers!
             var storage: JobStorage!
             var processor: AnyJobProcessor!
 
             beforeEach {
-              schedulers = JobQueueSchedulers()
+              schedulers = Queue.Schedulers()
               storage = TestJobStorage(scheduler: schedulers.storage)
 
-              queue = JobQueue(name: "test",
+              queue = Queue(name: "test",
                                schedulers: schedulers,
                                storage: storage)
-              processor = JobProcessor<String>()
-              queue.register(JobProcessor<String>.self)
+              processor = Job.Processor<String>()
+              queue.register(Job.Processor<String>.self)
             }
 
             it("should send an error because the default job processor is abstract") {
@@ -204,16 +204,16 @@ class JobProcessorTests: QuickSpec {
         }
 
         context("a typed job") {
-          var queue: JobQueue!
-          var schedulers: JobQueueSchedulers!
+          var queue: Queue!
+          var schedulers: Queue.Schedulers!
           var storage: JobStorage!
           var processor: AnyJobProcessor!
 
           beforeEach {
-            schedulers = JobQueueSchedulers()
+            schedulers = Queue.Schedulers()
             storage = TestJobStorage(scheduler: schedulers.storage)
 
-            queue = JobQueue(name: "test",
+            queue = Queue(name: "test",
                              schedulers: schedulers,
                              storage: storage)
             processor = Processor3()

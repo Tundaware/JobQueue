@@ -11,21 +11,21 @@ import JobQueueCore
 
 // Internal JobProcessor contract
 protocol AnyJobProcessor: class {
-  static var jobType: JobType { get }
+  static var jobType: Job.TypeName { get }
 
   var status: Property<JobProcessorStatus> { get }
 
   init(logger: Logger)
 
   func change(status: JobProcessorStatus) -> SignalProducer<Void, JobQueueError>
-  func process(job: Job, queue: JobQueue)
+  func process(job: Job, queue: Queue)
 }
 
 public enum JobProcessorStatus: CustomStringConvertible, Equatable {
   /// The processor has been created and has not been acted on
   case new
   /// The processor is actively processing a job
-  case active(job: Job, queue: JobQueue)
+  case active(job: Job, queue: Queue)
   /// The processor is cancelled for some reason
   case cancelled(JobCancellationReason)
   /// The processor has completed. This status is set by sub-classes
@@ -79,76 +79,78 @@ public enum JobProcessorStatus: CustomStringConvertible, Equatable {
   }
 }
 
-/// The base processor that all processors should sub-class
-open class JobProcessor<Payload> where Payload: Codable {
-  open class var jobType: JobType {
-    return String(describing: Self.self)
-  }
-  
-  private let scheduler = QueueScheduler()
+extension Job {
+  /// The base processor that all processors should sub-class
+  open class Processor<Payload> where Payload: Codable {
+    open class var jobType: Job.TypeName {
+      return String(describing: Self.self)
+    }
 
-  private let _status = MutableProperty<JobProcessorStatus>(.new)
-  public private(set) lazy var status = Property(capturing: _status)
+    private let scheduler = QueueScheduler()
 
-  public let logger: Logger
+    private let _status = MutableProperty<JobProcessorStatus>(.new)
+    public private(set) lazy var status = Property(capturing: _status)
 
-  public required init(
-    logger: Logger = ConsoleLogger()
-  ) {
-    self.logger = logger
+    public let logger: Logger
 
-    /// Observe the processor's own status and invoke the `process` and `cancel`
-    /// functions when appropriate
-    self.status.producer
-      .skipRepeats()
-      .on(
-        value: {
-          logger.trace("JobProcessor (\(Self.jobType)): Observed New Status -> \($0)")
-          switch $0 {
-          case .active(let job, let queue):
-            self.process(job: job, queue: queue)
-          case .cancelled(let reason):
-            self.cancel(reason: reason)
-          default:
-            break
+    public required init(
+      logger: Logger = ConsoleLogger()
+    ) {
+      self.logger = logger
+
+      /// Observe the processor's own status and invoke the `process` and `cancel`
+      /// functions when appropriate
+      self.status.producer
+        .skipRepeats()
+        .on(
+          value: {
+            logger.trace("JobProcessor (\(Self.jobType)): Observed New Status -> \($0)")
+            switch $0 {
+            case .active(let job, let queue):
+              self.process(job: job, queue: queue)
+            case .cancelled(let reason):
+              self.cancel(reason: reason)
+            default:
+              break
+            }
           }
-        }
+        )
+        .start()
+    }
+
+    /// Invoked after a processor's status is changed to `.active(job:queue:)`
+    ///
+    /// This function **should not** be called directly
+    ///
+    /// - Parameters:
+    ///   - job: The job to process
+    ///   - payload: The job's deserialized payload
+    ///   - queue: The queue the job is in. Use carefully. Do not use it to modify
+    ///            the job being processed, that's what the `change(status:)` function
+    ///            is for.
+    open func process(job: Job, payload: Payload, queue: Queue) {
+      self.change(
+        status:
+        .failed(
+          at: Date(),
+          error: .abstractFunction("process(job:payload:queue:) is abstract and must be implemented by JobProcessor sub-classes")
+        )
       )
       .start()
-  }
+    }
 
-  /// Invoked after a processor's status is changed to `.active(job:queue:)`
-  ///
-  /// This function **should not** be called directly
-  ///
-  /// - Parameters:
-  ///   - job: The job to process
-  ///   - payload: The job's deserialized payload
-  ///   - queue: The queue the job is in. Use carefully. Do not use it to modify
-  ///            the job being processed, that's what the `change(status:)` function
-  ///            is for.
-  open func process(job: Job, payload: Payload, queue: JobQueue) {
-    self.change(status:
-      .failed(
-        at: Date(),
-        error: .abstractFunction("process(job:payload:queue:) is abstract and must be implemented by JobProcessor sub-classes")
-      )
-    )
-    .start()
-  }
-
-  /// Invoked after a processor's status is changed to `.cancelled(reason:)`
-  ///
-  /// This function **should not** be called directly
-  ///
-  /// - Parameter reason: The reason for cancellation. This should be used if the
-  ///                     job requires special handling when cancelled.
-  ///                     e.g. Delete a partially downloaded file
-  open func cancel(reason: JobCancellationReason) {
+    /// Invoked after a processor's status is changed to `.cancelled(reason:)`
+    ///
+    /// This function **should not** be called directly
+    ///
+    /// - Parameter reason: The reason for cancellation. This should be used if the
+    ///                     job requires special handling when cancelled.
+    ///                     e.g. Delete a partially downloaded file
+    open func cancel(reason: JobCancellationReason) {}
   }
 }
 
-extension JobProcessor: AnyJobProcessor {
+extension Job.Processor: AnyJobProcessor {
   /// Changes the status of the job processor
   ///
   /// The status is only changed if it is permitted given the current status
@@ -195,13 +197,13 @@ extension JobProcessor: AnyJobProcessor {
   }
 }
 
-extension JobProcessor: Equatable {
-  public static func == (lhs: JobProcessor<Payload>, rhs: JobProcessor<Payload>) -> Bool {
+extension Job.Processor: Equatable {
+  public static func == (lhs: Job.Processor<Payload>, rhs: Job.Processor<Payload>) -> Bool {
     return ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
 }
 
-extension JobProcessor {
+extension Job.Processor {
   /// Default implementation that uses the JSONEncoder
   ///
   /// - Parameter payload: the payload
@@ -217,7 +219,7 @@ extension JobProcessor {
   }
 }
 
-extension JobProcessor {
+extension Job.Processor {
   /// Ensures the raw payload can be deserialized to the typed payload. If successful,
   /// invoke the open `process` function. Otherwise, change the processor's status
   /// to failed.
@@ -225,7 +227,7 @@ extension JobProcessor {
   /// - Parameters:
   ///   - job: the job to process
   ///   - queue: the queue the job is associated with
-  func process(job: Job, queue: JobQueue) {
+  func process(job: Job, queue: Queue) {
     do {
       let payload = try Self.deserialize(job.payload)
       self.process(job: job, payload: payload, queue: queue)

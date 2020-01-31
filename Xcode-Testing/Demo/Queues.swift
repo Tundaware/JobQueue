@@ -9,12 +9,12 @@ import JobQueue
 import NanoID
 import ReactiveSwift
 
-class TestProcessor: JobProcessor<String> {
-  override class var jobType: JobType {
+class TestProcessor: Job.Processor<String> {
+  override class var jobType: Job.TypeName {
     return "Test"
   }
 
-  override func process(job: Job, payload: String, queue: JobQueue) {
+  override func process(job: Job, payload: String, queue: Queue) {
     QueueScheduler().schedule(after: Date().addingTimeInterval(TimeInterval.random(in: 0.5...10))) {
       self.change(status: .completed(at: Date())).start()
     }
@@ -24,17 +24,17 @@ class TestProcessor: JobProcessor<String> {
 public class Queues {
   public static let shared = Queues()
 
-  private let schedulers = JobQueueSchedulers()
+  private let schedulers = Queue.Schedulers()
 
-  private var inMemoryQueue: JobQueue?
+  private var inMemoryQueue: Queue?
 
   private let coreDataStack = CoreDataStack()
-  private var coreDataQueue: JobQueue?
+  private var coreDataQueue: Queue?
 
   private var database: Database?
-  private var couchbaseLiteQueue: JobQueue?
+  private var couchbaseLiteQueue: Queue?
 
-  public private(set) var queues = [JobQueueName: JobQueue]()
+  public private(set) var queues = [QueueName: Queue]()
 
   init() {
     self.demoInMemoryQueue()
@@ -43,7 +43,7 @@ public class Queues {
   }
 
   func demoInMemoryQueue() {
-    self.inMemoryQueue = JobQueue(
+    self.inMemoryQueue = Queue(
       name: "InMemory Queue",
       schedulers: self.schedulers,
       storage: InMemoryStorage(scheduler: self.schedulers.storage)
@@ -55,7 +55,7 @@ public class Queues {
   }
 
   func demoCoreDataQueue() {
-    self.coreDataQueue = JobQueue(
+    self.coreDataQueue = Queue(
       name: "CoreData Queue",
       schedulers: self.schedulers,
       storage: CoreDataStorage(
@@ -79,7 +79,7 @@ public class Queues {
     guard let database = self.database else {
       fatalError()
     }
-    self.couchbaseLiteQueue = JobQueue(
+    self.couchbaseLiteQueue = Queue(
       name: "CouchbaseLite Queue",
       schedulers: self.schedulers,
       storage: CouchbaseLiteStorage(database: database)
@@ -90,7 +90,7 @@ public class Queues {
     self.demo(queue: queue)
   }
 
-  func demo(queue: JobQueue) {
+  func demo(queue: Queue) {
     self.queues[queue.name] = queue
 
     let id = ID(size: 10)

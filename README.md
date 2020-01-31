@@ -55,19 +55,18 @@ struct Email: Codable {
   var body: String
 }
 
-// If you inherit from the `DefaultJob<T>` class, all you need to do is override and implement the `process(?)` function
-class SendAnEmail: DefaultJob<Email> {
+// If you inherit from the `Job.Processor<T>` class, all you need to do is override and implement the `process(?)` function
+class SendAnEmail: Job.Processor<Email> {
   override func process(
     details: JobDetails,
     payload: Email,
-    queue: JobQueueProtocol,
-    done: @escaping JobCompletion
+    queue: QueueIdentity
   ) {
     send(email: payload) { error in
       if let error = error {
-        done(.failure(error))
+        self.change(status: .failed(at: Date(), error: error))
       } else {
-        done(.success(()))
+        self.change(status: .completed(at: Date()))
       }
     }
   }
@@ -77,10 +76,10 @@ class SendAnEmail: DefaultJob<Email> {
 ### Create a JobQueue instance
 
 ```swift
-let schedulers = JobQueueSchedulers()
-let storage = JobQueueInMemoryStorage()
+let schedulers = Queue.Schedulers()
+let storage = InMemoryStorage()
 
-let queue = JobQueue(
+let queue = Queue(
   name: "email",
   schedulers: schedulers,
   storage: storage

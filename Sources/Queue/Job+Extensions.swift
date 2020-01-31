@@ -22,15 +22,15 @@ extension Job {
   ///   - progress: The job's initial progress
   public init<T, Payload>(
     _ type: T.Type,
-    id: JobID,
-    queueName: JobQueueName,
+    id: Job.ID,
+    queueName: QueueName,
     payload: Payload,
     queuedAt: Date = Date(),
-    status: JobStatus = .waiting,
-    schedule: JobSchedule? = nil,
+    status: Status = .waiting,
+    schedule: Schedule? = nil,
     order: Float? = nil,
     progress: Float? = nil
-  ) throws where T: JobProcessor<Payload> {
+  ) throws where T: Processor<Payload> {
     self.init(
       type: T.jobType,
       id: id,

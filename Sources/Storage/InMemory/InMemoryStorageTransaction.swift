@@ -11,21 +11,21 @@ import JobQueueCore
 extension InMemoryStorage {
   public class Transaction: JobStorageTransaction {
     enum Change {
-      case stored(JobQueueName, JobID, Job)
-      case removed(JobQueueName, JobID, Job)
-      case removedAll(JobQueueName)
+      case stored(QueueName, Job.ID, Job)
+      case removed(QueueName, Job.ID, Job)
+      case removedAll(QueueName)
     }
 
     private let logger: Logger
-    private var data: [JobQueueName: [JobID: Job]]
-    private var queue: JobQueueProtocol?
+    private var data: [QueueName: [Job.ID: Job]]
+    private var queue: QueueIdentity?
 
     internal var changes = [Change]()
     internal let id = UUID().uuidString
 
     public init(
-      queue: JobQueueProtocol? = nil,
-      data: [JobQueueName: [JobID: Job]],
+      queue: QueueIdentity? = nil,
+      data: [QueueName: [Job.ID: Job]],
       logger: Logger
     ) {
       self.logger = logger
@@ -33,7 +33,7 @@ extension InMemoryStorage {
       self.data = data
     }
 
-    public func get(_ id: JobID, queue: JobQueueProtocol?) -> Result<Job, JobQueueError> {
+    public func get(_ id: Job.ID, queue: QueueIdentity?) -> Result<Job, JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
         return .failure(.noQueueProvided)
       }
@@ -46,7 +46,7 @@ extension InMemoryStorage {
       return .success(job)
     }
 
-    public func getAll(queue: JobQueueProtocol?) -> Result<[Job], JobQueueError> {
+    public func getAll(queue: QueueIdentity?) -> Result<[Job], JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
         return .failure(.noQueueProvided)
       }
@@ -56,18 +56,18 @@ extension InMemoryStorage {
       return .success(jobs.values.map { $0 })
     }
 
-    public func store(_ job: Job, queue: JobQueueProtocol?) -> Result<Job, JobQueueError> {
+    public func store(_ job: Job, queue: QueueIdentity?) -> Result<Job, JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
         return .failure(.noQueueProvided)
       }
-      var jobs = self.data[queue.name, default: [JobID: Job]()]
+      var jobs = self.data[queue.name, default: [Job.ID: Job]()]
       jobs[job.id] = job
       self.data[queue.name] = jobs
       self.changes.append(.stored(queue.name, job.id, job))
       return .success(job)
     }
 
-    public func remove(_ id: JobID, queue: JobQueueProtocol?) -> Result<JobID, JobQueueError> {
+    public func remove(_ id: Job.ID, queue: QueueIdentity?) -> Result<Job.ID, JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
         return .failure(.noQueueProvided)
       }
@@ -83,7 +83,7 @@ extension InMemoryStorage {
       return .success(id)
     }
 
-    public func remove(_ job: Job, queue: JobQueueProtocol?) -> Result<Job, JobQueueError> {
+    public func remove(_ job: Job, queue: QueueIdentity?) -> Result<Job, JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
         return .failure(.noQueueProvided)
       }
@@ -99,7 +99,7 @@ extension InMemoryStorage {
       return .success(job)
     }
 
-    public func removeAll(queue: JobQueueProtocol?) -> Result<Void, JobQueueError> {
+    public func removeAll(queue: QueueIdentity?) -> Result<Void, JobQueueError> {
       guard let queue = (queue ?? self.queue) else {
         return .failure(.noQueueProvided)
       }
