@@ -24,9 +24,9 @@ class JobQueueTests: QuickSpec {
       schedulers = Queue.Schedulers()
       storage = TestJobStorage(scheduler: schedulers.storage)
       queue = Queue(name: randomString(),
-                       schedulers: schedulers,
-                       storage: storage,
-                       delayStrategy: JobQueueDelayPollingStrategy(interval: 0.25))
+                    schedulers: schedulers,
+                    storage: storage,
+                    delayStrategy: JobQueueDelayPollingStrategy(interval: 0.25))
     }
     describe("resuming") {
       it("should send true") {
@@ -173,10 +173,10 @@ class JobQueueTests: QuickSpec {
         it("should run the job after the delayed status' `until` date") {
           let date = Date(timeIntervalSinceNow: 2)
           let job = try! Job(Processor1.self,
-            id: "delayed1",
-            queueName: queue.name,
-            payload: "delayed job",
-            status: .delayed(until: date))
+                             id: "delayed1",
+                             queueName: queue.name,
+                             payload: "delayed job",
+                             status: .delayed(until: date))
 
           queue.register(Processor1.self, concurrency: 50)
           var disposable: Disposable?
@@ -208,6 +208,63 @@ class JobQueueTests: QuickSpec {
               .start()
           }
           disposable?.dispose()
+        }
+      }
+
+      describe("reducing concurrency") {
+        describe("when more jobs are being processed than the concurrency allows for") {
+          it("should cancel the expected number of jobs") {
+            let date = Date(timeIntervalSinceNow: 2)
+            let payload = TestPayload1(name: "payload")
+            let job1 = try! Job(Processor2.self,
+                                id: "job1",
+                                queueName: queue.name,
+                                payload: payload,
+                                status: .delayed(until: date))
+            let job2 = try! Job(Processor2.self,
+                                id: "job2",
+                                queueName: queue.name,
+                                payload: payload,
+                                status: .delayed(until: date))
+
+            queue.register(Processor2.self, concurrency: 2)
+            var disposable: Disposable?
+            var jobs = Set<Job.ID>()
+
+            waitUntil(timeout: 5) { done in
+              disposable = queue.events.producer
+                .startWithValues { event in
+                  switch event {
+                  case .beganProcessing(let job):
+                    jobs.insert(job.id)
+                    if jobs == Set<Job.ID>([job1.id, job2.id]) {
+                      queue.register(Processor2.self, concurrency: 1)
+                    }
+                  case .finishedProcessing(let job):
+                    jobs.remove(job.id)
+                  case .cancelledProcessing(let job, let reason):
+                    expect(jobs.contains(job!.id)).to(beTrue())
+                    switch reason {
+                    case .statusChangedToWaiting:
+                      _ = succeed()
+                      done()
+                    default:
+                      fail()
+                    }
+                  default:
+                    break
+                  }
+                }
+              SignalProducer.combineLatest(queue.store(job1),
+                                           queue.store(job2))
+                .on(value: { _ in
+                  print("HERE")
+                })
+                .then(queue.resume())
+                .start()
+            }
+            disposable?.dispose()
+          }
         }
       }
     }

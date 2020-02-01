@@ -152,7 +152,7 @@ public extension Queue {
           return
         }
         self.logger.trace("Queue (\(self.name)) resumed")
-        self._events.input.send(value: .resumed)
+        self.send(event: .resumed)
       })
   }
 
@@ -175,7 +175,7 @@ public extension Queue {
           return
         }
         self.logger.trace("Queue (\(self.name)) suspended")
-        self._events.input.send(value: .suspended)
+        self.send(event: .suspended)
       })
   }
 
@@ -219,7 +219,7 @@ public extension Queue {
     }
     return self.set(job.id, status: status)
       .on(completed: {
-        self._events.input.send(value: .updatedStatus(job))
+        self.send(event: .updatedStatus(job))
       })
   }
 
@@ -334,7 +334,7 @@ public extension Queue {
       logger: self.logger
     )
     self.scheduleSynchronization()
-    self._events.input.send(value: .registeredProcessor(T.jobType, concurrency: concurrency))
+    self.send(event: .registeredProcessor(T.jobType, concurrency: concurrency))
   }
 }
 
@@ -376,7 +376,7 @@ private extension Queue {
             return kvp.value.change(status: .cancelled(.removed))
               .on(
                 value: { _ in
-                  self._events.input.send(value: .cancelledProcessing(nil, .removed))
+                  self.send(event: .cancelledProcessing(nil, .removed))
                 }
               ).map { _ in }
           }
@@ -392,7 +392,7 @@ private extension Queue {
           return kvp.value.change(status: .cancelled(cancellationReason))
             .on(
               value: { _ in
-                self._events.input.send(value: .cancelledProcessing(job, cancellationReason))
+                self.send(event: .cancelledProcessing(job, cancellationReason))
               }
             )
             .map { _ in }
@@ -521,7 +521,7 @@ private extension Queue {
                   .on(
                     value: {
                       self.logger.trace("Queue (\(self.name)) finished processing job \($0.id)")
-                      self._events.input.send(value: .finishedProcessing($0))
+                      self.send(event: .finishedProcessing($0))
                     }
                   )
                   .map { _ in }
@@ -530,7 +530,7 @@ private extension Queue {
                   .on(
                     value: {
                       self.logger.trace("Queue (\(self.name)) failed processing job \($0.id)")
-                      self._events.input.send(value: .failedProcessing($0, error))
+                      self.send(event: .failedProcessing($0, error))
                     }
                   )
                   .map { _ in }
@@ -541,7 +541,18 @@ private extension Queue {
           /// Activate the processor
           return processor
             .change(status: .active(job: job, queue: self))
+            .on(completed: {
+              self.send(event: .beganProcessing(job))
+            })
             .map { _ in _job }
         }
+  }
+}
+
+extension Queue {
+  func send(event: QueueEvent) {
+    self.schedulers.events.schedule {
+      self._events.input.send(value: event)
+    }
   }
 }
