@@ -1,6 +1,5 @@
 [![SwiftPM compatible](https://img.shields.io/badge/SwiftPM-compatible-orange.svg)](#swift-package-manager) [![Cocoapods compatible](https://img.shields.io/cocoapods/v/JobQueue)](https://cocoapods.org/pods/JobQueue) [![GitHub release](https://img.shields.io/github/release/Tundaware/JobQueue.svg)](https://github.com/Tundaware/JobQueue/releases) ![Swift 5.1](https://img.shields.io/badge/Swift-5.1-orange.svg) ![platforms](https://img.shields.io/cocoapods/p/JobQueue)
-[![Build Status](https://travis-ci.com/Tundaware/JobQueue.svg?token=68ifssJzBEm6iihApcf1&branch=master)](https://travis-ci.com/Tundaware/JobQueue)
-
+![Build](https://github.com/Tundaware/JobQueue/workflows/Build/badge.svg)
 # JobQueue
 
 A persistent job queue with a simple API that does not depend on `Operation`/`OperationQueue`, is storage agnostic, supports for manual execution order, per job type concurrency limits, delayed jobs, and more.
