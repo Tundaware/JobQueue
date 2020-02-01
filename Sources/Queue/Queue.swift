@@ -333,7 +333,7 @@ public extension Queue {
       concurrency: concurrency,
       logger: self.logger
     )
-
+    self.scheduleSynchronization()
     self._events.input.send(value: .registeredProcessor(T.jobType, concurrency: concurrency))
   }
 }
