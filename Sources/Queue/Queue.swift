@@ -421,6 +421,8 @@ private extension Queue {
 
   func getCancellationReason(given status: Job.Status) -> JobCancellationReason? {
     switch status {
+    case .active:
+      return .statusChangedToWaiting
     case .paused:
       return .statusChangedToPaused
     case .delayed:
